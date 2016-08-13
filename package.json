@@ -1,0 +1,28 @@
+{
+  "name": "pepo",
+  "version": "0.1.0",
+  "description": "REST-сервер проекта twitter 2.0",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:volchata/pepo.git"
+  },
+  "dependencies": {
+    "morgan": "^1.7.0",
+    "nconf": "^0.8.4",
+    "restify": "^4.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.3.0",
+    "eslint-config-pedant": "^0.7.0"
+  },
+  "engines": {
+    "node": ">=5.0.0",
+    "npm": ">=1.3.14"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "lint": "eslint ."
+  },
+  "main": "main.js"
+  
+}
