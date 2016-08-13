@@ -1,7 +1,5 @@
-'use strict';
-
-var restify = require('restify');
-var path = require('path');
+var controllers = require('./controllers'),
+	fillHellow = controllers.fakeResults.fillHellow;
 
 function setHandlers(server) {
 
@@ -10,36 +8,18 @@ function setHandlers(server) {
         return next(false);
     });
 
-    server.get('/login', function (req, res, next) {
-    	
+    server.get('/login', function (req, res) {
         res.send({
-        	login: "true",
-        	tweets: fillHellow()
+            login: true,
+            tweets: fillHellow()
         });
-        return next(false);
     });
 
-    server.get('/user/:id/twitt', function (req, res, next) {
-       	var helloW = [],
-       		offset = req.query.offset || 0;
-    	helloW.length = req.query.limit || 10;
-
+    server.get('/user/:id/twitt', function (req, res) {
         res.send({
-        	tweets: fillHellow(req.query.limit, req.query.offset)
+            tweets: fillHellow(req.query.limit, req.query.offset)
         });
-        return next(false);
     });
-
-    function fillHellow (limit, offset){
-    	var helloW = [],
-    	offset =  offset || 0;
-    	helloW.length = limit || 10;
-
-    	return helloW.fill("Hello world").map((value, index) => {
-        		return value + '-' + (parseInt(offset) + index + 1);
-        })
-
-    }
 }
 
 module.exports.set = setHandlers;
