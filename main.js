@@ -1,7 +1,6 @@
 'use strict';
 
 var restify = require('restify');
-var conf = require('./conf');
 var router = require('./router');
 var morgan = require('morgan');
 
@@ -15,7 +14,3 @@ server.use(restify.queryParser());
 server.use(restify.bodyParser());
 
 router.set(server);
-
-server.listen(conf.get('server:port'), function () {
-    console.log('%s listening at %s', server.name, server.url);
-});
