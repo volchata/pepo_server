@@ -1,9 +1,9 @@
 /**
  * Created by sasha on 13.08.16.
  */
+'use strict';
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-//var bcrypt = require('bcrypt');
 
 // Thanks to http://blog.matoski.com/articles/jwt-express-node-mongoose/
 
@@ -24,9 +24,8 @@ var UserSchema = new Schema({
         type: String,
         unique: true,
         required: false,
-        sparse:true
+        sparse: true
     }
-    
 });
 
 /*

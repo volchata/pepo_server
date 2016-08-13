@@ -1,9 +1,7 @@
 'use strict';
 
-var restify = require('restify');
-var path = require('path');
 var mongoose = require('mongoose');
-var User   = require('./app/models/user');
+var User = require('./app/models/user');
 var conf = require('./conf');
 mongoose.connect(conf.get('database'));
 
@@ -12,36 +10,35 @@ mongoose.connect(conf.get('database'));
  this.password=password;
  }
  var users=[];*/
-function listUsers(req,res,next){
-    User.find({}, function(err, users) {
+function listUsers(req, res, next) {
+    User.find({}, function (err, users) {
         var userMap = {};
 
-        users.forEach(function(user) {
+        users.forEach(function (user) {
             userMap[user._id] = user;
         });
 
-        res.send(200,userMap);
+        res.send(200, userMap);
+
     });
 
 }
-function createUser(req,res,next){
+
+function createUser(req, res, next) {
 //console.log(req);
     var login = req.params.login;
     console.log(login);
-    var user=new User({login:login});
+    var user = new User({login: login});
     user.save(function (err, user) {
-        if (err){
+        if (err) {
             console.error(err.toJSON());
             res.send(400);
+
         }
-        console.log([user])
-        res.send(200,user);
+        console.log([user]);
+        res.send(200, user);
     });
-
-
 }
-
-
 
 function setHandlers(server) {
 
@@ -50,18 +47,13 @@ function setHandlers(server) {
         return next(false);
     });
 
-
-
-
-    server.get('/users/',listUsers );
+    server.get('/users/', listUsers);
 //server.head('/hello/:name', respond);
-    server.post('/users/',createUser)
+    server.post('/users/', createUser);
 
-    server.listen(8080, function() {
+    server.listen(8080, function () {
         console.log('%s listening at %s', server.name, server.url);
     });
-
-
 }
 
 module.exports.set = setHandlers;
