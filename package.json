@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "eslint": "^3.3.0",
+    "eslint-config-loris": "^5.1.0",
     "eslint-config-pedant": "^0.7.0"
   },
   "engines": {
@@ -24,5 +25,4 @@
     "lint": "eslint ."
   },
   "main": "main.js"
-  
 }
