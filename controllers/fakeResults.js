@@ -1,7 +1,7 @@
-function fillHellow (limit, offset){
+function fillHellow (limit = 10, offset = 0){
     var helloW = [],
-    offset =  offset || 0;
-    helloW.length = limit || 10;
+    offset =  offset;
+    helloW.length = limit;
 
     return helloW.fill("Hello world").map((value, index) => {
             return value + '-' + (parseInt(offset) + index + 1);
