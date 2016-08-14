@@ -4,7 +4,7 @@ function fillHellow (limit = 10, offset = 0){
     helloW.length = limit;
 
     return helloW.fill("Hello world").map((value, index) => {
-            return value + '-' + (parseInt(offset) + index + 1);
+        return value + '-' + (parseInt(offset) + index + 1);
     })
 }
 
