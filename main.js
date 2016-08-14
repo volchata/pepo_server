@@ -1,21 +1,31 @@
 'use strict';
 
-var restify = require('restify');
-var conf = require('./conf');
-var router = require('./router');
-var morgan = require('morgan');
+var fs = require('fs'),
+    path = require('path'),
+    express = require('express'),
+    router = require('./router'),
+    app = express(),
+    expressSession = require('express-session'),
+    bodyParser = require('body-parser'),
+    morgan = require('morgan'),
+    cookieSession = require('cookie-session'),
+    slashes = require('connect-slashes'),
 
-var server = restify.createServer({
-    name: 'pepo',
-    version: '0.1.0'
-});
-server.use(morgan('combined'));
-server.use(restify.acceptParser(server.acceptable));
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
+    passport = require('passport'),
+    config = require('./conf'),
 
-router.set(server);
+    port = process.env.PORT || config.defaultPort;
 
-server.listen(conf.get('server:port'), function () {
-    console.log('%s listening at %s', server.name, server.url);
+app
+    .use(morgan('combined'))
+    .use(bodyParser.json())
+    .use(bodyParser.urlencoded({ extended: false }))
+    .use(cookieSession({ keys: [config.get("sessionSecret")] }))
+    .use(passport.initialize())
+    .use(passport.session())
+    .use(slashes())
+    .use(router);
+
+app.listen(config.get('server:port'), function () {
+    console.log('listening at %s', config.get('server:port'));
 });
