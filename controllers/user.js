@@ -7,4 +7,11 @@ function getUsers (req, res){
     })
 }
 
-module.exports.getUsers = getUsers;
+function user (req, res){
+    res.send(`Hello ${req.user.userName}, your ID: ${req.user.userID} <a href="/logout">LOGOUT</a>`);
+}
+
+module.exports = {
+    getUsers,
+    user
+}

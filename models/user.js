@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 
 var schema = new Schema({
-    username: {
+    userName: {
         type: String,
         required: true
     },
@@ -11,6 +11,9 @@ var schema = new Schema({
         type: String,
         unique: true,
         required: true
+    },
+    provider: {
+        type: String
     }
 });
 

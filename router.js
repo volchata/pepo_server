@@ -7,7 +7,14 @@ var express = require('express'),
 
 router
     .get('/', controllers.mainPage.hello)
+    .get('/login', controllers.login.login)
+    .get('/logout', function(req, res) {
+        req.logout();
+        res.redirect('/');
+    })
+    //receive all users from DB in json
     .get('/users', controllers.user.getUsers)
+    .get('/user', controllers.user.user)
 
     .get('/auth/vk',
         passport.authenticate('vkontakte', {
@@ -18,7 +25,7 @@ router
     .get('/auth/vk/callback',
         passport.authenticate('vkontakte'),
         function (req, res) {
-            res.redirect('/');
+            res.redirect('/user');
         })
 
     .get('/auth/fb',
@@ -28,7 +35,7 @@ router
     )
     .get('/auth/fb/callback',
         passport.authenticate('facebook', {
-            successRedirect: '/'
+            successRedirect: '/user'
         })
     );
  
