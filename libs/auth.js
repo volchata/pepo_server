@@ -16,7 +16,7 @@ passport.use(new FacebookStrategy({
     function(accessToken, refreshToken, profile, done) {
         //check user table for anyone with a fb ID of profile.id
         User.findOne({
-            'userID': profile.id 
+            $and: [{'userID': profile.id}, {'provider': "fb"}]
         }, function(err, user) {
             if (err) {
                 return done(err);
@@ -48,7 +48,7 @@ passport.use(new VKontakteStrategy ({
     function(accessToken, refreshToken, profile, done) {
         //check user table for anyone with a vk ID of profile.id
         User.findOne({
-            'userID': profile.id 
+            $and: [{'userID': profile.id}, {'provider': "vk"}]
         }, function(err, user) {
             if (err) {
                 return done(err);

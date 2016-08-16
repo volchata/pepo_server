@@ -1,5 +1,7 @@
-function hello (req, res){
-    res.send('<a href="/login">LOGIN</a>');
+'use strict';
+
+function hello(req, res) {
+    res.json({mainPage: true});
 }
 
 module.exports.hello = hello;

@@ -1,5 +1,7 @@
-function login (req, res){
-    res.send('<a href="/auth/fb">FB</a>   <a href="/auth/vk">VK</a>');
+'use strict';
+
+function login(req, res) {
+    res.json({FB: '/auth/fb', VK: '/auth/vk'});
 }
 
 module.exports.login = login;

@@ -1,26 +1,20 @@
 'use strict';
 
-var fs = require('fs'),
-    path = require('path'),
-    express = require('express'),
-    router = require('./router'),
-    app = express(),
-    expressSession = require('express-session'),
-    bodyParser = require('body-parser'),
-    morgan = require('morgan'),
-    cookieSession = require('cookie-session'),
-    slashes = require('connect-slashes'),
-
-    passport = require('passport'),
-    config = require('./conf'),
-
-    port = process.env.PORT || config.defaultPort;
+var express = require('express');
+var app = express();
+var bodyParser = require('body-parser');
+var morgan = require('morgan');
+var cookieSession = require('cookie-session');
+var slashes = require('connect-slashes');
+var router = require('./router');
+var passport = require('passport');
+var config = require('./conf');
 
 app
     .use(morgan('combined'))
     .use(bodyParser.json())
-    .use(bodyParser.urlencoded({ extended: false }))
-    .use(cookieSession({ keys: [config.get("sessionSecret")] }))
+    .use(bodyParser.urlencoded({extended: false}))
+    .use(cookieSession({keys: [config.get('sessionSecret')]}))
     .use(passport.initialize())
     .use(passport.session())
     .use(slashes())

@@ -1,14 +1,14 @@
 'use strict';
 
-var express = require('express'),
-    router = express.Router(),
-    controllers = require('./controllers'),
-    passport = require('./libs/auth');
+var express = require('express');
+var router = express.Router();
+var controllers = require('./controllers');
+var passport = require('./libs/auth');
 
 router
     .get('/', controllers.mainPage.hello)
     .get('/login', controllers.login.login)
-    .get('/logout', function(req, res) {
+    .get('/logout', function (req, res) {
         req.logout();
         res.redirect('/');
     })
@@ -20,7 +20,7 @@ router
         passport.authenticate('vkontakte', {
             scope: ['friends']
         }),
-        function (req, res) {
+        function () {
         })
     .get('/auth/vk/callback',
         passport.authenticate('vkontakte'),
@@ -38,6 +38,5 @@ router
             successRedirect: '/user'
         })
     );
- 
 
 module.exports = router;
