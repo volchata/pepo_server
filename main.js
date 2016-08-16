@@ -1,21 +1,25 @@
 'use strict';
 
-var restify = require('restify');
-var conf = require('./conf');
-var router = require('./router');
+var express = require('express');
+var app = express();
+var bodyParser = require('body-parser');
 var morgan = require('morgan');
+var cookieSession = require('cookie-session');
+var slashes = require('connect-slashes');
+var router = require('./router');
+var passport = require('passport');
+var config = require('./conf');
 
-var server = restify.createServer({
-    name: 'pepo',
-    version: '0.1.0'
-});
-server.use(morgan('combined'));
-server.use(restify.acceptParser(server.acceptable));
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
+app
+    .use(morgan('combined'))
+    .use(bodyParser.json())
+    .use(bodyParser.urlencoded({extended: false}))
+    .use(cookieSession({keys: [config.get('sessionSecret')]}))
+    .use(passport.initialize())
+    .use(passport.session())
+    .use(slashes())
+    .use(router);
 
-router.set(server);
-
-server.listen(conf.get('server:port'), function () {
-    console.log('%s listening at %s', server.name, server.url);
+app.listen(config.get('server:port'), function () {
+    console.log('listening at %s', config.get('server:port'));
 });

@@ -1,5 +1,26 @@
 {
-	"server": {
-		"port":8080
-	}
+    "server": {
+        "port":8080
+    },
+    "mongoose": {
+        "uri": "mongodb://localhost/twitter",
+        "options": {
+            "server": {
+                "socketOptions": {
+                    "keepAlive": 1
+                }
+            }
+        }
+    },
+    "auth": {
+        "vk": {
+            "app_id": 5587407,
+            "secret": "cMSjo6WD82mYItW0URLY"
+        },
+        "fb": {
+            "app_id": 1099622363441148,
+            "secret": "aa4a1ba7160d7968f62556eb6ca7a981"
+        }
+    },
+    "sessionSecret": "REPLACE_ME_WITH_RANDOM_STRING"
 }

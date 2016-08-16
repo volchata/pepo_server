@@ -1,15 +1,42 @@
 'use strict';
 
-var restify = require('restify');
-var path = require('path');
+var express = require('express');
+var router = express.Router();
+var controllers = require('./controllers');
+var passport = require('./libs/auth');
 
-function setHandlers(server) {
+router
+    .get('/', controllers.mainPage.hello)
+    .get('/login', controllers.login.login)
+    .get('/logout', function (req, res) {
+        req.logout();
+        res.redirect('/');
+    })
+    //receive all users from DB in json
+    .get('/users', controllers.user.getUsers)
+    .get('/user', controllers.user.user)
 
-    server.get('/user/:login', function (req, res, next) {
-        res.send('Hello world.  Here will be user ' + req.params.name + ' json in future');
-        return next(false);
-    });
+    .get('/auth/vk',
+        passport.authenticate('vkontakte', {
+            scope: ['friends']
+        }),
+        function () {
+        })
+    .get('/auth/vk/callback',
+        passport.authenticate('vkontakte'),
+        function (req, res) {
+            res.redirect('/user');
+        })
 
-}
+    .get('/auth/fb',
+        passport.authenticate('facebook', {
+            scope: 'public_profile'
+        })
+    )
+    .get('/auth/fb/callback',
+        passport.authenticate('facebook', {
+            successRedirect: '/user'
+        })
+    );
 
-module.exports.set = setHandlers;
+module.exports = router;
