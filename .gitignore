@@ -35,3 +35,6 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# ignoring secured config file with real db password
+conf/conf_secured.json

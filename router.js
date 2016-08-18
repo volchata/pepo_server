@@ -6,7 +6,8 @@ var controllers = require('./controllers');
 var passport = require('./libs/auth');
 
 router
-    .get('/', controllers.mainPage.hello)
+    .use(controllers.corps)
+    .get('/auth', controllers.mainPage.hello)
     .get('/login', controllers.login.login)
     .get('/logout', function (req, res) {
         req.logout();

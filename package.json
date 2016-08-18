@@ -21,10 +21,13 @@
     "passport-vkontakte": "^0.3.2"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
     "eslint": "^3.3.0",
     "eslint-config-loris": "^5.1.0",
     "eslint-config-pedant": "^0.7.0",
-    "git-hooks": "^1.1.0"
+    "git-hooks": "^1.1.0",
+    "mocha": "^3.0.2"
   },
   "engines": {
     "node": ">=5.0.0",
@@ -35,7 +38,8 @@
     "lint": "eslint .",
     "fix" : "eslint --fix .",
     "fix1" : "eslint --fix ",
-    "lint1": "eslint "
+    "lint1": "eslint ",
+    "test": "node_modules/.bin/mocha"
   },
   "main": "main.js"
 }
