@@ -1,5 +1,5 @@
 {
-  "name": "pepo",
+  "name" : "pepo",
   "version": "0.1.0",
   "description": "REST-сервер проекта twitter 2.0",
   "repository": {
@@ -33,7 +33,9 @@
   "scripts": {
     "start": "node main.js",
     "lint": "eslint .",
-    "fix" : "eslint --fix ."
+    "fix" : "eslint --fix .",
+    "fix1" : "eslint --fix ",
+    "lint1": "eslint "
   },
   "main": "main.js"
 }
