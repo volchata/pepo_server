@@ -12,7 +12,7 @@ function getUsers(req, res, next) {
 }
 
 function user(req, res) {
-    res.json({userName: req.user.userName, userID: req.user.userID, provider: req.user.provider});
+    res.json({login: req.user.login, id: req.user.id, provider: req.user.provider});
 }
 
 module.exports = {
