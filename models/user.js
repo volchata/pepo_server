@@ -5,16 +5,16 @@ var Schema = mongoose.Schema;
 
 var schema = new Schema({
 
-    login: {
+    displayName: {
         type: String,
-        required: true,
-        unique: true
+        required: true
+
     },
 
     provider: {
         type: String
     },
-    id: {
+    socialNetworkId: {
         type: Number,
 
         required: true

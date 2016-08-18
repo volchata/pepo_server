@@ -12,7 +12,10 @@ function getUsers(req, res, next) {
 }
 
 function user(req, res) {
-    res.json({login: req.user.login, id: req.user.id, provider: req.user.provider});
+    res.json({
+        displayName: req.user.displayName,
+        socialNetworkId: req.user.socialNetworkId,
+        provider: req.user.provider});
 }
 
 module.exports = {
