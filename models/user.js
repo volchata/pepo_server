@@ -5,12 +5,6 @@ var Schema = mongoose.Schema;
 
 var schema = new Schema({
 
-    id: {
-        type: Number,
-        unique: true,
-        required: true
-    },
-
     login: {
         type: String,
         required: true,
@@ -20,6 +14,12 @@ var schema = new Schema({
     provider: {
         type: String
     },
+    id: {
+        type: Number,
+
+        required: true
+    },
+
     firstName: {
         type: String
     },
@@ -33,6 +33,7 @@ var schema = new Schema({
     friends: [{type: Schema.Types.ObjectId, ref: 'this'}]
 
 });
+schema.index({provider: 1, id: 1}, {unique: true});
 
 exports.User = mongoose.model('User', schema);
 exports.Mongoose = mongoose;
