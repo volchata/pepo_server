@@ -16,7 +16,7 @@ passport.use(new FacebookStrategy({
     function(accessToken, refreshToken, profile, done) {
         //check user table for anyone with a fb ID of profile.id
         User.findOne({
-            $and: [{'id': profile.id}, {'provider': "fb"}]
+            $and: [{'socialNetworkId': profile.id}, {'provider': "fb"}]
         }, function(err, user) {
             if (err) {
                 return done(err);
@@ -24,8 +24,8 @@ passport.use(new FacebookStrategy({
             //No user was found... so create a new user with values from FB
             if (!user) {
                 user = new User({
-                    login: profile.displayName,
-                    id: profile.id,
+                    displayName: profile.displayName,
+                    socialNetworkId: profile.id,
                     provider: 'fb'
                 });
                 user.save(function(err) {
@@ -48,7 +48,7 @@ passport.use(new VKontakteStrategy ({
     function(accessToken, refreshToken, profile, done) {
         //check user table for anyone with a vk ID of profile.id
         User.findOne({
-            $and: [{'id': profile.id}, {'provider': "vk"}]
+            $and: [{'socialNetworkId': profile.id}, {'provider': "vk"}]
         }, function(err, user) {
             if (err) {
                 return done(err);
@@ -56,8 +56,8 @@ passport.use(new VKontakteStrategy ({
             //No user was found... so create a new user with values from VK
             if (!user) {
                 user = new User({
-                    login: profile.displayName,
-                    id: profile.id,
+                    displayName: profile.displayName,
+                    socialNetworkId: profile.id,
                     provider: 'vk'
                 });
                 user.save(function(err) {
