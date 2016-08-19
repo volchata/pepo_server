@@ -5,12 +5,6 @@ var Schema = mongoose.Schema;
 
 var twit = new Schema({
 
-    id: {
-        type: Number,
-        unique: true,
-        required: true
-    },
-
     author: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
 
     content: {
