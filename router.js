@@ -17,6 +17,9 @@ router
     .get('/users', controllers.user.getUsers)
     .get('/user', controllers.user.user)
 
+    .get('/api/user/:login/feed', controllers.tweet.getTweets)
+    .post('/api/user/:login/feed', controllers.tweet.setTweet)
+
     .get('/auth/vk',
         passport.authenticate('vkontakte', {
             scope: ['friends']
