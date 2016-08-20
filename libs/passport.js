@@ -3,6 +3,32 @@ var config = require('../conf'),
     User = require('../models/user').User,
     FacebookStrategy = require('passport-facebook').Strategy,
     VKontakteStrategy  = require('passport-vkontakte').Strategy;
+
+function authenticate(accessToken, refreshToken, profile, done) {
+    //check user table for anyone with a fb ID of profile.id
+    User.findOne({
+        $and: [{'socialNetworkId': profile.id}, {'provider': profile.provider}]
+    }, function(err, user) {
+        if (err) {
+            return done(err);
+        }
+        //No user was found... so create a new user with values from FB
+        if (!user) {
+            user = new User({
+                displayName: profile.provider +'_'+ profile.id,
+                socialNetworkId: profile.id,
+                provider: profile.provider
+            });
+            user.save(function(err) {
+                if (err) console.log(err);
+                return done(err, user);
+            });
+        } else {
+            //found user. Return
+            return done(err, user);
+        }
+    });
+}
  
 
 var callbackUrlPrefix = 'http://'+config.get('server:host') + ':' + config.get('server:port')
@@ -16,31 +42,8 @@ passport.use(new FacebookStrategy({
             'displayName',
         ]
     },
-    function(accessToken, refreshToken, profile, done) {
-        //check user table for anyone with a fb ID of profile.id
-        User.findOne({
-            $and: [{'socialNetworkId': profile.id}, {'provider': "fb"}]
-        }, function(err, user) {
-            if (err) {
-                return done(err);
-            }
-            //No user was found... so create a new user with values from FB
-            if (!user) {
-                user = new User({
-                    displayName: profile.displayName,
-                    socialNetworkId: profile.id,
-                    provider: 'fb'
-                });
-                user.save(function(err) {
-                    if (err) console.log(err);
-                    return done(err, user);
-                });
-            } else {
-                //found user. Return
-                return done(err, user);
-            }
-        });
-    }
+    authenticate
+    
 ));
  
 passport.use(new VKontakteStrategy ({
@@ -48,31 +51,7 @@ passport.use(new VKontakteStrategy ({
         clientSecret: config.get("auth:vk:secret"),
         callbackURL: callbackUrlPrefix+"/auth/vk/callback"
     },
-    function(accessToken, refreshToken, profile, done) {
-        //check user table for anyone with a vk ID of profile.id
-        User.findOne({
-            $and: [{'socialNetworkId': profile.id}, {'provider': "vk"}]
-        }, function(err, user) {
-            if (err) {
-                return done(err);
-            }
-            //No user was found... so create a new user with values from VK
-            if (!user) {
-                user = new User({
-                    displayName: profile.displayName,
-                    socialNetworkId: profile.id,
-                    provider: 'vk'
-                });
-                user.save(function(err) {
-                    if (err) console.log(err);
-                    return done(err, user);
-                });
-            } else {
-                //found user. Return
-                return done(err, user);
-            }
-        });
-    }
+    authenticate
 ));
  
 passport.serializeUser(function (user, done) {
