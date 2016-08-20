@@ -23,7 +23,6 @@ apiRouter                                   // в этот роутер попа
     //.post('/api/user', controllers.user.postUser)
     .post('/user/:id', controllers.user.stub); // stub
 
-
 module.exports = function (app) {
     app
         .use('/api', apiRouter)
