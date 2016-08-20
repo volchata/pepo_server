@@ -10,8 +10,12 @@ var router = require('./router');
 var passport = require('passport');
 var config = require('./conf');
 
+// в среде тестирования это не выводим
+if (process.env.NODE_ENV !== 'test') {
+    app.use(morgan('combined'));
+}
+
 app
-    .use(morgan('combined'))
     .use(bodyParser.json())
     .use(bodyParser.urlencoded({extended: false}))
     .use(cookieSession({keys: [config.get('sessionSecret')]}))
@@ -23,3 +27,5 @@ app
 app.listen(config.get('server:port'), function () {
     console.log('listening at %s', config.get('server:port'));
 });
+
+module.exports.app = app;
