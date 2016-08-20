@@ -13,11 +13,13 @@ commonRouter        // роутер для обычных путей аутен�
     .get('/auth/fb', controllers.auth.authFB)
     .get('/auth/fb/callback', controllers.auth.authFB);
 
+
 apiRouter                                   // в этот роутер попадают только точки API, для них нужны:
     .use(controllers.auth.ensureAuthenticatedAPI) // обязательная проверка аутентификации пользователя
     .use(controllers.cors)                  // и заголовки Cross origin resourse sharing
                                             // всё что указано ниже будет работать только после аутентификации
     .get('/user', controllers.user.user)
+    .get('/users', controllers.user.getUsers)
     .post('/user/:id', controllers.user.stub); // stub
 
 module.exports = function (app) {
