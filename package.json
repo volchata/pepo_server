@@ -30,8 +30,6 @@
     "git-hooks": "^1.1.0",
     "mocha": "^3.0.2",
     "node-mocks-http": "^1.5.3"
-
-
   },
   "engines": {
     "node": ">=5.0.0",
