@@ -24,6 +24,14 @@ app
     .use(slashes())
     .use(router);
 
+app.use(errorHandler);
+
+ /*eslint-disable no-unused-vars */
+function errorHandler(err, req, res, next) {
+    res.status(500).send({status: 'Application error, try later'});
+}
+/*eslint-enable no-alert */
+
 app.listen(config.get('server:port'), function () {
     console.log('listening at %s', config.get('server:port'));
 });
