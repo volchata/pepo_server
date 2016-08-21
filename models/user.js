@@ -33,7 +33,7 @@ var schema = new Schema({
     friends: [{type: Schema.Types.ObjectId, ref: 'this'}]
 
 });
-schema.index({provider: 1, id: 1}, {unique: true});
+schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 
 exports.User = mongoose.model('User', schema);
 exports.Mongoose = mongoose;

@@ -1,43 +1,27 @@
 'use strict';
 
 var express = require('express');
-var router = express.Router();
+var apiRouter = express.Router();
+var commonRouter = express.Router();
 var controllers = require('./controllers');
-var passport = require('./libs/auth');
 
-router
-    .use(controllers.corps)
-    .get('/auth', controllers.mainPage.hello)
-    .get('/login', controllers.login.login)
-    .get('/logout', function (req, res) {
-        req.logout();
-        res.redirect('/');
-    })
-    //receive all users from DB in json
-    .get('/users', controllers.user.getUsers)
+commonRouter        // роутер для обычных путей аутентификации
+    .use(controllers.auth.ensureAuthenticated)
+    .get('/logout', controllers.auth.logout)
+    .get('/auth/vk', controllers.auth.authVK)
+    .get('/auth/vk/callback', controllers.auth.authVK)
+    .get('/auth/fb', controllers.auth.authFB)
+    .get('/auth/fb/callback', controllers.auth.authFB);
+
+apiRouter                                   // в этот роутер попадают только точки API, для них нужны:
+    .use(controllers.auth.ensureAuthenticatedAPI) // обязательная проверка аутентификации пользователя
+    .use(controllers.cors)                  // и заголовки Cross origin resourse sharing
+                                            // всё что указано ниже будет работать только после аутентификации
     .get('/user', controllers.user.user)
+    .post('/user/:id', controllers.user.stub); // stub
 
-    .get('/auth/vk',
-        passport.authenticate('vkontakte', {
-            scope: ['friends']
-        }),
-        function () {
-        })
-    .get('/auth/vk/callback',
-        passport.authenticate('vkontakte'),
-        function (req, res) {
-            res.redirect('/user');
-        })
-
-    .get('/auth/fb',
-        passport.authenticate('facebook', {
-            scope: 'public_profile'
-        })
-    )
-    .get('/auth/fb/callback',
-        passport.authenticate('facebook', {
-            successRedirect: '/user'
-        })
-    );
-
-module.exports = router;
+module.exports = function (app) {
+    app
+        .use('/api', apiRouter)
+        .use(commonRouter);
+};

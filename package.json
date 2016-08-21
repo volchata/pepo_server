@@ -1,5 +1,5 @@
 {
-  "name" : "pepo",
+  "name": "pepo",
   "version": "0.1.0",
   "description": "REST-сервер проекта twitter 2.0",
   "repository": {
@@ -10,7 +10,6 @@
     "body-parser": "^1.15.2",
     "connect-slashes": "^1.3.1",
     "cookie-parser": "^1.4.1",
-    "cookie-session": "^1.2.0",
     "express": "^4.14.0",
     "express-session": "^1.14.0",
     "mongoose": "^4.5.8",
@@ -36,8 +35,8 @@
   "scripts": {
     "start": "node main.js",
     "lint": "eslint .",
-    "fix" : "eslint --fix .",
-    "fix1" : "eslint --fix ",
+    "fix": "eslint --fix .",
+    "fix1": "eslint --fix ",
     "lint1": "eslint ",
     "test": "node_modules/.bin/mocha"
   },

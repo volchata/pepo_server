@@ -4,10 +4,13 @@ var config = require('../conf'),
     FacebookStrategy = require('passport-facebook').Strategy,
     VKontakteStrategy  = require('passport-vkontakte').Strategy;
  
+
+var callbackUrlPrefix = 'http://'+config.get('server:host') + ':' + config.get('server:port')
+
 passport.use(new FacebookStrategy({
         clientID: config.get("auth:fb:app_id"),
         clientSecret: config.get("auth:fb:secret"),
-        callbackURL: "http://localhost:8080/auth/fb/callback",
+        callbackURL: callbackUrlPrefix+"/auth/fb/callback",
         profileFields: [
             'id',
             'displayName',
@@ -43,7 +46,7 @@ passport.use(new FacebookStrategy({
 passport.use(new VKontakteStrategy ({
         clientID: config.get("auth:vk:app_id"),
         clientSecret: config.get("auth:vk:secret"),
-        callbackURL: "http://localhost:8080/auth/vk/callback"
+        callbackURL: callbackUrlPrefix+"/auth/vk/callback"
     },
     function(accessToken, refreshToken, profile, done) {
         //check user table for anyone with a vk ID of profile.id
@@ -84,5 +87,8 @@ passport.deserializeUser(function (data, done) {
         done(err)
     }
 });
- 
+
+
+
 module.exports = passport;
+

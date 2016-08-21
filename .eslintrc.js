@@ -7,7 +7,8 @@ module.exports = {
         mocha: true
     },
     "rules": {
-    	"no-console":0
+    	"no-console":0,
+        "space-in-parens":0
     },
 
 };
