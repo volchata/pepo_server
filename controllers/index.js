@@ -4,5 +4,6 @@ module.exports = {
     mainPage: require('./mainPage'),
     user: require('./user'),
     login: require('./login'),
-    corps: require('./corps')
+    corps: require('./corps'),
+    tweet: require('./tweetAPI')
 };
