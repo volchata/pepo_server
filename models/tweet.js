@@ -3,7 +3,7 @@
 var mongoose = require('../libs/mongoose-connect');
 var Schema = mongoose.Schema;
 
-var tweet = new Schema({
+var schema = new Schema({
     author: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
 
     content: {
@@ -11,15 +11,21 @@ var tweet = new Schema({
     },
     timestamp: {type: Date, default: Date.now},
     extras: {
-        prevTweetId: {
+        parentTweetId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'this',
-            required: false},
+            required: false
+        },
+        commentedTweetId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'this',
+            required: false
+        },
         image: {type: String},
         url: {type: String},
         geo: {type: Schema.Types.Mixed}
     }
 });
 
-exports.Tweet = mongoose.model('Tweet', tweet);
+exports.Tweet = mongoose.model('Tweet', schema);
 exports.Mongoose = mongoose;

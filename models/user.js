@@ -9,19 +9,15 @@ var schema = new Schema({
         type: String,
         required: true,
         unique: true
-
     },
-
     provider: {
         type: String
     },
     socialNetworkId: {
         type: Number,
-
         required: true
     },
     notRegistered: {type: Boolean, default: true},
-
     firstName: {
         type: String
     },
@@ -39,6 +35,20 @@ var schema = new Schema({
 
 });
 schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
+
+schema.statics.isUser = function (req, res, err, user, next) {
+    if (err) {
+        next(err);
+        return false;
+    }
+
+    if (!user) {
+        res.status(404).send({status: 'User not found'});
+        return false;
+    }
+
+    return true;
+};
 
 exports.User = mongoose.model('User', schema);
 exports.Mongoose = mongoose;
