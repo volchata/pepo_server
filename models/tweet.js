@@ -12,15 +12,14 @@ var schema = new Schema({
     timestamp: {type: Date, default: Date.now},
     extras: {
         parentTweetId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'this',
-            required: false
+            type: Schema.Types.ObjectId,
+            ref: 'Tweet'
         },
         commentedTweetId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'this',
-            required: false
+            type: Schema.Types.ObjectId,
+            ref: 'Tweet'
         },
+        comments: [{type: Schema.Types.ObjectId, ref: 'Tweet'}],
         image: {type: String},
         url: {type: String},
         geo: {type: Schema.Types.Mixed}

@@ -30,10 +30,11 @@ var schema = new Schema({
     description: {
         type: String
     },
-    folowers: [{type: Schema.Types.ObjectId, ref: 'this'}],
-    friends: [{type: Schema.Types.ObjectId, ref: 'this'}]
+    folowers: [{type: Schema.Types.ObjectId, ref: 'User'}],
+    friends: [{type: Schema.Types.ObjectId, ref: 'User'}]
 
 });
+
 schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 
 schema.statics.isUser = function (req, res, err, user, next) {
