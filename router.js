@@ -4,14 +4,21 @@ var express = require('express');
 var apiRouter = express.Router();
 var commonRouter = express.Router();
 var controllers = require('./controllers');
+var rproxy = require('./libs/rproxy');
 
 commonRouter        // роутер для обычных путей аутентификации
-    .use(controllers.auth.ensureAuthenticated)
-    .get('/logout', controllers.auth.logout)
+    .get('/auth/', rproxy)
     .get('/auth/vk', controllers.auth.authVK)
     .get('/auth/vk/callback', controllers.auth.authVK)
     .get('/auth/fb', controllers.auth.authFB)
-    .get('/auth/fb/callback', controllers.auth.authFB);
+    .get('/auth/fb/callback', controllers.auth.authFB)
+    .get('/favicon.ico', rproxy)
+    .get(/\.js$|\.css$/, rproxy)
+    .use(controllers.auth.ensureAuthenticated)  // точка проверки аутентификации
+    .get('/logout', controllers.auth.logout)
+    .get('/feed/', rproxy)
+    .get('/feed', rproxy)
+    .get('/signup/', rproxy);
 
 apiRouter                                   // в этот роутер попадают только точки API, для них нужны:
     .use(controllers.auth.ensureAuthenticatedAPI) // обязательная проверка аутентификации пользователя

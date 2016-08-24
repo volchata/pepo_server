@@ -7,7 +7,7 @@ function send403(res) {
 }
 
 function restartAuth(res) {
-    return res.redirect('/auth');
+    return res.redirect('/auth/');
 }
 
 function startApp(res) {
@@ -32,9 +32,9 @@ function ensureAuthenticatedAPI(req, res, next) {
 // eslint-disable-next-line no-unused-vars
 function ensureAuthenticated(req, res, next) {
     if (!req.isAuthenticated || !req.isAuthenticated()) {
-        return res.redirect('/auth');
+        return restartAuth(res);
     } else {
-        return res.redirect('/feed');
+        return next();
     }
 }
 
