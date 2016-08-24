@@ -18,7 +18,12 @@ function user(req, res) {
         provider: req.user.provider});
 }
 
+function stub(req, res) {
+    res.json({stub: 'data'});
+}
+
 module.exports = {
     getUsers,
-    user
+    user,
+    stub
 };
