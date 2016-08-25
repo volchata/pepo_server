@@ -40,6 +40,8 @@ describe('User controller unit test', function () {
         }
     }
 
+
+
     before(function () {
         clear();
         user1 = new User(Json1);
