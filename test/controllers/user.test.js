@@ -69,10 +69,16 @@ describe('User controller unit test', function () {
         ctr.postUser(request, response);
 
         response.on('end', function () {
-            assert.equal(response._getRedirectUrl(), '/api/user');
-            assert.equal(response.statusCode, 302);
+            //assert.equal(response._getRedirectUrl(), '/api/user');
+            //assert.equal(response.statusCode, 302);
+            assert.equal(response.statusCode, 200);
             Json1.isRegistered = true;
             Json1.displayName = 'newDisplayName';
+            var json = JSON.parse(response._getData());
+            for (var i in Json1) {
+                assert.equal(json[i], Json1[i]);
+            }
+
             done();
         });
 
@@ -91,10 +97,15 @@ describe('User controller unit test', function () {
         ctr.postUser(request, response);
 
         response.on('end', function () {
-            assert.equal(response._getRedirectUrl(), '/api/user');
-            assert.equal(response.statusCode, 302);
+            //assert.equal(response._getRedirectUrl(), '/api/user');
+            //assert.equal(response.statusCode, 302);
+            assert.equal(response.statusCode, 200);
             Json1.isRegistered = true;
             Json1.firstName = 'newFirstName';
+            var json = JSON.parse(response._getData());
+            for (var i in Json1) {
+                assert.equal(json[i], Json1[i]);
+            }
             done();
         });
 
@@ -113,10 +124,13 @@ describe('User controller unit test', function () {
         ctr.postUser(request, response);
 
         response.on('end', function () {
-            assert.equal(response._getRedirectUrl(), '/api/user');
-            assert.equal(response.statusCode, 302);
+            assert.equal(response.statusCode, 200);
             Json1.isRegistered = true;
             Json1.lastName = 'newLastName';
+            var json = JSON.parse(response._getData());
+            for (var i in Json1) {
+                assert.equal(json[i], Json1[i]);
+            }
             done();
         });
 

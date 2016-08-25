@@ -37,11 +37,13 @@ function postUser(req, res) {
             if (err) {
                 res.status(400).send(err);
             } else {
-                res.redirect('/api/user');
+                //res.redirect('/api/user');
+                user(req, res);
             }
         });
     } else {
-        res.redirect('/api/user');
+        //res.redirect('/api/user');
+        user(req, res);
     }
 
 }
