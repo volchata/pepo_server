@@ -24,18 +24,13 @@ function user(req, res) {
 
 function postUser(req, res) {
     var modified = false;
-    if (typeof req.body.displayName !== 'undefined') {
-        req.user.displayName = String(req.body.displayName).trim();
-        modified = true;
+    for (var i of ['displayName', 'firstName', 'lastName']) {
+        if (typeof req.body[i] !== 'undefined') {
+            req.user[i] = String(req.body[i]).trim();
+            modified = true;
+        }
     }
-    if (typeof req.body.firstName !== 'undefined') {
-        req.user.firstName = String(req.body.firstName).trim();
-        modified = true;
-    }
-    if (typeof req.body.lastName !== 'undefined') {
-        req.user.lastName = String(req.body.lastName).trim();
-        modified = true;
-    }
+
     if (modified) {
         req.user.isRegistered = true;
         req.user.save(function (err) {
