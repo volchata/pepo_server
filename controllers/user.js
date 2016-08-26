@@ -35,7 +35,12 @@ function postUser(req, res) {
         req.user.isRegistered = true;
         req.user.save(function (err) {
             if (err) {
-                res.status(400).send(err);
+                if ( err.code === 11000 ) {
+                    res.status(409).send({status: 'Duplicate key'});
+                } else {
+                    res.status(400).send({status: 'Error saving data'});
+                }
+
             } else {
                 //res.redirect('/api/user');
                 user(req, res);
