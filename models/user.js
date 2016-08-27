@@ -1,6 +1,7 @@
 'use strict';
 
 var mongoose = require('../libs/mongoose-connect');
+mongoose.Promise = global.Promise;
 var Schema = mongoose.Schema;
 
 var schema = new Schema({

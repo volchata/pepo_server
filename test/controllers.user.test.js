@@ -1,8 +1,8 @@
 'use strict';
 
 var httpMocks = require('node-mocks-http');
-var ctr = require('../../controllers/user');
-var User = require('../../models/user').User;
+var ctr = require('../controllers/user');
+var User = require('../models/user').User;
 var assert = require('assert');
 var when = require('when');
 
