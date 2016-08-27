@@ -10,22 +10,23 @@ function getUsers(req, res, next) {
         res.json(users);
     });
 }
-
-function user(req, res) {
+function userToData(user) {
     var data = {
-        displayName: req.user.displayName,
+        displayName: user.displayName,
         //socialNetworkId: req.user.socialNetworkId,
         //provider: req.user.provider,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        description: req.user.description,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        description: user.description,
         avatar: 'http://placehold.it/100x100'
     };
-    if (req.user.notRegistered) {
+    if (user.notRegistered) {
         data.notRegistered = true;
     }
-
-    res.json(data);
+    return data;
+}
+function user(req, res) {
+    res.json(userToData(req.user));
 }
 
 function postUser(req, res) {
@@ -67,5 +68,6 @@ module.exports = {
     getUsers,
     user,
     stub,
-    postUser
+    postUser,
+    userToData
 };
