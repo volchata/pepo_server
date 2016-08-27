@@ -7,7 +7,8 @@ var schema = new Schema({
 
     displayName: {
         type: String,
-        required: true
+        required: true,
+        unique: true
 
     },
 
@@ -19,6 +20,7 @@ var schema = new Schema({
 
         required: true
     },
+    isRegistered: {type: Boolean, default: false},
 
     firstName: {
         type: String

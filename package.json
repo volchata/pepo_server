@@ -13,6 +13,7 @@
     "express": "^4.14.0",
     "express-session": "^1.14.0",
     "mongoose": "^4.5.8",
+    "mongoose-paginate": "^5.0.0",
     "morgan": "^1.7.0",
     "nconf": "^0.8.4",
     "passport": "^0.3.2",
@@ -20,13 +21,16 @@
     "passport-vkontakte": "^0.3.2"
   },
   "devDependencies": {
+    "assert": "^1.4.1",
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
     "eslint": "^3.3.0",
     "eslint-config-loris": "^5.1.0",
     "eslint-config-pedant": "^0.7.0",
     "git-hooks": "^1.1.0",
-    "mocha": "^3.0.2"
+    "mocha": "^3.0.2",
+    "when": "^3.7.7",
+    "node-mocks-http": "^1.5.3"
   },
   "engines": {
     "node": ">=5.0.0",
