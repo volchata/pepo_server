@@ -3,10 +3,12 @@
 var express = require('express');
 var apiRouter = express.Router();
 var commonRouter = express.Router();
+var staticRouter = express.Router();
 var controllers = require('./controllers');
 var rproxy = require('./libs/rproxy');
 
 commonRouter        // роутер для обычных путей аутентификации
+    .use('/doc/api', express.static('apidoc'))
     .get('/auth/', rproxy)
     .get('/auth/vk', controllers.auth.authVK)
     .get('/auth/vk/callback', controllers.auth.authVK)
@@ -41,6 +43,7 @@ apiRouter
 
 module.exports = function (app) {
     app
+        .use(staticRouter)
         .use('/api', apiRouter)
         .use(commonRouter);
 };

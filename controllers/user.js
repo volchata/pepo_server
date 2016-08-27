@@ -15,10 +15,42 @@ function userToData(user) {
     }
     return data;
 }
+
+/**
+ * @api {get} /api/user Get user profile
+ * @apiGroup User
+ * @apiName GetUser
+ * @apiVersion 0.1.0
+ * @apiSuccess (200) {String} displayname Displayname of the User.
+ * @apiSuccess (200) {String} firstName Firstname of the User.
+ * @apiSuccess (200) {String} lastName Lastname of the User.
+ * @apiSuccess (200) {String} description Description of the User.
+ * @apiSuccess (200) {String} avatar Avatar of the User.
+ * @apiSuccess (200) {String} notRegistered Set if user does not send initial profile update after social login
+ * @apiError (Errors) 403 Access denied
+ * @param req
+ * @param res
+ */
 function user(req, res) {
     res.json(userToData(req.user));
 }
-
+/**
+ * @api {post} /api/user Update user profile
+ * @apiGroup User
+ * @apiName PostUser
+ * @apiVersion 0.1.0
+ * @apiSuccess (200) {String} displayname Displayname of the User.
+ * @apiSuccess (200) {String} firstName Firstname of the User.
+ * @apiSuccess (200) {String} lastName Lastname of the User.
+ * @apiSuccess (200) {String} description Description of the User.
+ * @apiSuccess (200) {String} avatar Avatar of the User.
+ * @apiSuccess (200) {String} notRegistered Set if user does not send initial profile update after social login
+ * @apiError (Errors) 409 Duplicate key
+ * @apiError (Errors) 403 Access denied
+ * @apiError (Errors) 400 Error
+ * @param req
+ * @param res
+ */
 function postUser(req, res) {
     var modified = false;
     var data = {};

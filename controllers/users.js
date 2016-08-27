@@ -11,8 +11,26 @@ var foreignUserFields = {
 function foreignUserToData(user) {
     return userToData(user);
 }
-
-function getUserByLogin(req, res, next) {
+/**
+ * @api {get} /api/users/:login Get foreign user profile
+ * @apiDescription Return profile of user identified by :login
+ * @apiGroup User
+ * @apiVersion 0.1.0
+ * @apiParam {String} :login User login
+ * @apiSuccess (200) {String} displayName Displayname of the User.
+ * @apiSuccess (200) {String} firstName Firstname of the User.
+ * @apiSuccess (200) {String} lastName Lastname of the User.
+ * @apiSuccess (200) {String} description Description of the User.
+ * @apiSuccess (200) {String} avatar Avatar of the User.
+ * @apiSuccess (200) {Boolean} notRegistered Set if user does not send initial profile update after social login
+ * @apiError (Errors) 403 Access denied
+ * @apiError (Errors) 404 User not found
+ * @apiError (Errors) 500 Error
+ * @param req
+ * @param res
+ * @param next
+ */
+    function getUserByLogin(req, res, next) {
     var displayName = req.params.login;
     User.byDisplayname(displayName).exec( function (err, user) {
         if (err) {

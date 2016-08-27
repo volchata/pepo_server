@@ -3,3 +3,4 @@ libs
 *bundles/**
 static
 **/*.deps.js
+apidoc
