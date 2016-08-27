@@ -26,7 +26,7 @@ apiRouter
 
     .get('/user', controllers.user.user)
     .post('/user', controllers.user.postUser)
-
+    .get('/users/:login', controllers.users.getUserByLogin)
     .get('/users/:login/feed', controllers.tweet.getTweets)
     .get('/user/feed', controllers.tweet.getTweets)
     .get('/tweet/:id', controllers.tweet.getTweet)
@@ -34,7 +34,9 @@ apiRouter
     .post('/tweet/:id/retweet', controllers.tweet.reTweet)
     .post('/tweet/:id', controllers.tweet.commentTweet)
     .post('/tweet/:id/like', controllers.tweet.likeTweet)
-    .delete('/tweet/:id', controllers.tweet.deleteTweet);
+    .delete('/tweet/:id', controllers.tweet.deleteTweet)
+
+;
 
 module.exports = function (app) {
     app
