@@ -1,5 +1,7 @@
 'use strict';
-//var User = require('../models/').User;
+
+var User = require('../models/user').User;
+
 function userToData(user) {
     var data = {
         displayName: user.displayName,
@@ -8,13 +10,15 @@ function userToData(user) {
         firstName: user.firstName,
         lastName: user.lastName,
         description: user.description,
-        avatar: 'http://placehold.it/100x100'
+        avatar: 'http://placehold.it/100x100',
+        folowers: user.folowers.length
     };
     if (user.notRegistered) {
         data.notRegistered = true;
     }
     return data;
 }
+
 
 /**
  * @api {get} /api/user Get user profile
@@ -34,6 +38,7 @@ function userToData(user) {
 function user(req, res) {
     res.json(userToData(req.user));
 }
+
 /**
  * @api {post} /api/user Update user profile
  * @apiGroup User
@@ -65,19 +70,6 @@ function postUser(req, res) {
     if (modified) {
         req.user.notRegistered = false;
         data.notRegistered = false;
-        /*User.findOneAndUpdate({_id: req.user._id}, {$set: data}, {new: true}, function (err, user) {
-            if (err) {
-                if ( err.code === 11000 ) {
-                    res.status(409).send({status: 'Duplicate key'});
-                } else {
-                    res.status(400).send({status: 'Error saving data'});
-                }
-
-            } else {
-                //res.redirect('/api/user');
-                res.json(userToData(user));
-            }
-        });*/
         req.user.save(function (err) {
             if (err) {
                 if ( err.code === 11000 ) {
@@ -87,19 +79,61 @@ function postUser(req, res) {
                 }
 
             } else {
-                //res.redirect('/api/user');
                 user(req, res);
             }
         });
     } else {
-        //res.redirect('/api/user');
         user(req, res);
     }
 
 }
 
+function followUser(req, res, next) {
+
+    var flogin = req.param.login;
+
+    User.getByLogin( flogin, res, next).then( (fuser) => {
+
+        var sid = req.user._id;
+        var func = {followers: req.user._id};
+        // console.log('Sid', sid, fuser.followers);
+
+        if (req.method === 'POST') {
+            if (fuser.followers.indexOf(sid) > -1) {
+                return res.json(userToData(fuser));
+            }
+            func = {$push: func};
+        } else if (req.method === 'DELETE') {
+            if (fuser.followers.indexOf(sid) === -1) {
+                return res.json(userToData(fuser));
+            }
+            func = {$pull: func};
+        }
+
+        User.findOneAndUpdate(
+            {
+                displayName: flogin,
+                notRegistered: false
+            },
+            func,
+            function (err, user) {
+                if (err) {
+                    return next(err);
+                }
+                if (user) {
+                    return res.json(userToData(user));
+                } else {
+                    res.status(404).json({status: 'User not found'});
+                }
+            }
+        );
+
+    } );
+}
+
 module.exports = {
     user,
     postUser,
-    userToData
+    userToData,
+    followUser
 };

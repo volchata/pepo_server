@@ -2,10 +2,6 @@
 
 var passport = require('../libs/passport');
 
-function send403(res) {
-    return res.status(403).json({status: 'Unauthenticated'});
-}
-
 function restartAuth(res) {
     return res.redirect('/auth/');
 }
@@ -24,7 +20,7 @@ function logout(req, res) {
 
 function ensureAuthenticatedAPI(req, res, next) {
     if (!req.isAuthenticated || !req.isAuthenticated()) {
-        return send403(res);
+        return res.status(403).json({status: 'Unauthenticated'});
     }
     return next();
 }
@@ -33,6 +29,22 @@ function ensureAuthenticatedAPI(req, res, next) {
 function ensureAuthenticated(req, res, next) {
     if (!req.isAuthenticated || !req.isAuthenticated()) {
         return restartAuth(res);
+    } else {
+        return next();
+    }
+}
+
+function ensureRegistered(req, res, next) {
+    if (req.user.notRegistered) {
+        return res.redirect('/signup');
+    } else {
+        return next();
+    }
+}
+
+function ensureRegisteredAPI(req, res, next) {
+    if (req.user.notRegistered) {
+        return res.status(403).json({status: 'PartialRegistration'});
     } else {
         return next();
     }
@@ -60,6 +72,8 @@ module.exports = {
     logout,
     ensureAuthenticated,
     ensureAuthenticatedAPI,
+    ensureRegistered,
+    ensureRegisteredAPI,
     authVK: authenticatorFabric('vkontakte'),
     authFB: authenticatorFabric('facebook')
 };
