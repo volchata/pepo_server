@@ -5,7 +5,7 @@ var app = express();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var session = require('express-session');
-var slashes = require('connect-slashes');
+// var slashes = require('connect-slashes');
 var router = require('./router');
 var passport = require('passport');
 var config = require('./conf');
@@ -16,6 +16,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 app
+    .disable('x-powered-by')
     .use(bodyParser.json())
     .use(bodyParser.urlencoded({extended: false}))
     .use(session({
@@ -32,13 +33,14 @@ app
         // })
     }))
     .use(passport.initialize())
-    .use(passport.session())
-    .use(slashes());
+    .use(passport.session());
+    // .use(slashes());
 
 router(app);
 
 app.listen(config.get('server:port'), function () {
     console.log('listening at %s:%s', config.get('server:host'), config.get('server:port'));
+    console.log('Proxyfing to %s:%s', config.get('client:host'), config.get('client:port'));
 });
 
 module.exports.app = app;
