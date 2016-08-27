@@ -37,13 +37,22 @@ describe('User controller unit test', function () {
         isRegistered: true,
         displayName: 'testprovider_2'
     };
+    var skipCheck = {
+        provider: true,
+        socialNetworkId: true
+
+    };
     function checkSaved() {
+
         var request = createRequest({method: 'GET', url: '/api/user'}, user1);
         var response = createResponse();
         ctr.user(request, response);
         var json = JSON.parse(response._getData());
         for (var i in Json1) {
-            assert.equal(json[i], Json1[i]);
+            if (!(i in skipCheck) || !skipCheck[i] ) {
+                assert.equal(json[i], Json1[i]);
+            }
+
         }
     }
 
@@ -85,7 +94,9 @@ describe('User controller unit test', function () {
             Json1.displayName = 'newDisplayName';
             var json = JSON.parse(response._getData());
             for (var i in Json1) {
-                assert.equal(json[i], Json1[i]);
+                if (!(i in skipCheck) || !skipCheck[i] ) {
+                    assert.equal(json[i], Json1[i]);
+                }
             }
 
             done();
@@ -108,16 +119,7 @@ describe('User controller unit test', function () {
         response.on('end', function () {
             //assert.equal(response._getRedirectUrl(), '/api/user');
             //assert.equal(response.statusCode, 302);
-            console.log(response._getData());
-            assert.equal(response.statusCode, 200);
-            Json1.isRegistered = true;
-            Json1.displayName = 'newDisplayName';
-
-            var json = JSON.parse(response._getData());
-            for (var i in Json1) {
-                assert.equal(json[i], Json1[i]);
-            }
-
+            assert.equal(response.statusCode, 409);
             done();
         });
 
@@ -142,7 +144,9 @@ describe('User controller unit test', function () {
             Json1.firstName = 'newFirstName';
             var json = JSON.parse(response._getData());
             for (var i in Json1) {
-                assert.equal(json[i], Json1[i]);
+                if (!(i in skipCheck) || !skipCheck[i] ) {
+                    assert.equal(json[i], Json1[i]);
+                }
             }
             done();
         });
@@ -167,7 +171,9 @@ describe('User controller unit test', function () {
             Json1.lastName = 'newLastName';
             var json = JSON.parse(response._getData());
             for (var i in Json1) {
-                assert.equal(json[i], Json1[i]);
+                if (!(i in skipCheck) || !skipCheck[i] ) {
+                    assert.equal(json[i], Json1[i]);
+                }
             }
             done();
         });

@@ -14,11 +14,14 @@ function getUsers(req, res, next) {
 function user(req, res) {
     res.json({
         displayName: req.user.displayName,
-        socialNetworkId: req.user.socialNetworkId,
-        provider: req.user.provider,
-        isRegistered: req.user.isRegistered,
+        //socialNetworkId: req.user.socialNetworkId,
+        //provider: req.user.provider,
+        isRegistered: req.user.isRegistered, //only if true
         firstName: req.user.firstName,
         lastName: req.user.lastName
+        //avatar
+        //descripion
+
     });
 }
 
