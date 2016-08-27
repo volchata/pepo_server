@@ -34,6 +34,7 @@ var schema = new Schema({
     friends: [{type: Schema.Types.ObjectId, ref: 'User'}]
 
 });
+schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 
 schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 
@@ -44,7 +45,7 @@ schema.statics.isUser = function (req, res, err, user, next) {
     }
 
     if (!user) {
-        res.status(404).send({status: 'User not found'});
+        res.status(404).json({status: 'User not found'});
         return false;
     }
 

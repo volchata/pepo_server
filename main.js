@@ -42,7 +42,7 @@ app.use(errorHandler);
 
  /*eslint-disable no-unused-vars */
 function errorHandler(err, req, res, next) {
-    res.status(500).send({status: 'Application error, try later'});
+    res.status(500).json({status: 'Application error, try later'});
 }
 /*eslint-enable no-alert */
 

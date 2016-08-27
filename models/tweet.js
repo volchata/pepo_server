@@ -20,6 +20,7 @@ var schema = new Schema({
             ref: 'Tweet'
         },
         comments: [{type: Schema.Types.ObjectId, ref: 'Tweet'}],
+        likes: [{type: Schema.Types.ObjectId, ref: 'User'}],
         image: {type: String},
         url: {type: String},
         geo: {type: Schema.Types.Mixed}
