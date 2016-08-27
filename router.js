@@ -25,10 +25,7 @@ apiRouter                                   // в этот роутер попа
     .use(controllers.cors)                  // и заголовки Cross origin resourse sharing
                                             // всё что указано ниже будет работать только после аутентификации
     .get('/user', controllers.user.user)
-    .use('/user/*', controllers.currentUser)
-    .get('/users', controllers.user.getUsers)
-    //.post('/api/user', controllers.user.postUser)
-    .post('/user/:id', controllers.user.stub); // stub
+    .post('/user', controllers.user.postUser);
 
 module.exports = function (app) {
     app

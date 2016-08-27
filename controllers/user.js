@@ -1,30 +1,27 @@
 'use strict';
 
-var User = require('../models/user').User;
-
-function getUsers(req, res, next) {
-    User.find({}, (err, users) => {
-        if (err) {
-            return next(err);
-        }
-        res.json(users);
-    });
+function userToData(user) {
+    var data = {
+        displayName: user.displayName,
+        //socialNetworkId: req.user.socialNetworkId,
+        //provider: req.user.provider,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        description: user.description,
+        avatar: 'http://placehold.it/100x100'
+    };
+    if (user.notRegistered) {
+        data.notRegistered = true;
+    }
+    return data;
 }
-
 function user(req, res) {
-    res.json({
-        displayName: req.user.displayName,
-        socialNetworkId: req.user.socialNetworkId,
-        provider: req.user.provider,
-        isRegistered: req.user.isRegistered,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName
-    });
+    res.json(userToData(req.user));
 }
 
 function postUser(req, res) {
     var modified = false;
-    for (var i of ['displayName', 'firstName', 'lastName']) {
+    for (var i of ['displayName', 'firstName', 'lastName', 'description']) {
         if (typeof req.body[i] !== 'undefined') {
             req.user[i] = String(req.body[i]).trim();
             modified = true;
@@ -32,7 +29,7 @@ function postUser(req, res) {
     }
 
     if (modified) {
-        req.user.isRegistered = true;
+        req.user.notRegistered = false;
         req.user.save(function (err) {
             if (err) {
                 if ( err.code === 11000 ) {
@@ -53,13 +50,8 @@ function postUser(req, res) {
 
 }
 
-function stub(req, res) {
-    res.json({stub: 'data'});
-}
-
 module.exports = {
-    getUsers,
     user,
-    stub,
-    postUser
+    postUser,
+    userToData
 };

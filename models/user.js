@@ -20,7 +20,7 @@ var schema = new Schema({
 
         required: true
     },
-    isRegistered: {type: Boolean, default: false},
+    notRegistered: {type: Boolean, default: true},
 
     firstName: {
         type: String
@@ -28,7 +28,10 @@ var schema = new Schema({
     lastName: {
         type: String
     },
-    photo: {
+    avatar: {
+        type: String
+    },
+    description: {
         type: String
     },
     folowers: [{type: Schema.Types.ObjectId, ref: 'this'}],
