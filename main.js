@@ -38,6 +38,14 @@ app
 
 router(app);
 
+app.use(errorHandler);
+
+ /*eslint-disable no-unused-vars */
+function errorHandler(err, req, res, next) {
+    res.status(500).json({status: 'Application error, try later'});
+}
+/*eslint-enable no-alert */
+
 app.listen(config.get('server:port'), function () {
     console.log('listening at %s:%s', config.get('server:host'), config.get('server:port'));
     console.log('Proxyfing to %s:%s', config.get('client:host'), config.get('client:port'));

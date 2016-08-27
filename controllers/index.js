@@ -5,5 +5,6 @@ module.exports = {
     limitData: require('./mUser').limitData,
     user: require('./user'),
     auth: require('./auth'),
-    cors: require('./cors')
+    cors: require('./cors'),
+    tweet: require('./tweetAPI')
 };

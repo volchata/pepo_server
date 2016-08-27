@@ -20,12 +20,21 @@ commonRouter        // роутер для обычных путей аутен�
     .get('/feed', rproxy)
     .get('/signup/', rproxy);
 
-apiRouter                                   // в этот роутер попадают только точки API, для них нужны:
-    .use(controllers.auth.ensureAuthenticatedAPI) // обязательная проверка аутентификации пользователя
-    .use(controllers.cors)                  // и заголовки Cross origin resourse sharing
-                                            // всё что указано ниже будет работать только после аутентификации
+apiRouter
+    .use(controllers.auth.ensureAuthenticatedAPI)
+    .use(controllers.cors)
+
     .get('/user', controllers.user.user)
-    .post('/user', controllers.user.postUser);
+    .post('/user', controllers.user.postUser)
+
+    .get('/users/:login/feed', controllers.tweet.getTweets)
+    .get('/user/feed', controllers.tweet.getTweets)
+    .get('/tweet/:id', controllers.tweet.getTweet)
+    .post('/user/feed', controllers.tweet.setTweet)
+    .post('/tweet/:id/retweet', controllers.tweet.reTweet)
+    .post('/tweet/:id', controllers.tweet.commentTweet)
+    .post('/tweet/:id/like', controllers.tweet.likeTweet)
+    .delete('/tweet/:id', controllers.tweet.deleteTweet);
 
 module.exports = function (app) {
     app
