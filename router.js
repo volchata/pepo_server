@@ -20,10 +20,10 @@ commonRouter        // роутер для обычных путей аутен�
     .get('/feed', rproxy)
     .get('/signup/', rproxy);
 
-apiRouter                                   // в этот роутер попадают только точки API, для них нужны:
-    .use(controllers.auth.ensureAuthenticatedAPI) // обязательная проверка аутентификации пользователя
-    .use(controllers.cors)                  // и заголовки Cross origin resourse sharing
-                                            // всё что указано ниже будет работать только после аутентификации
+apiRouter                                  
+    .use(controllers.auth.ensureAuthenticatedAPI) 
+    .use(controllers.cors)                  
+                                            
     .get('/user', controllers.user.user)
     .post('/user', controllers.user.postUser);
 

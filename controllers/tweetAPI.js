@@ -5,31 +5,28 @@ var User = require('../models/user').User;
 var mongoose = require('mongoose');
 
 function setTweet(req, res, next) {
+    User.findOne({
+        $and: [
+            {socialNetworkId: req.user.socialNetworkId},
+            {provider: req.user.provider}
+        ]}, (err, user) => {
+                if (!User.isUser(req, res, err, user, next)) {
+                    return;
+                }
 
-    User.findOne({displayName: req.params.login}, (err, user) => {
-        if (!User.isUser(req, res, err, user, next)) {
-            return;
-        }
+                var tweet = new Tweet({
+                    author: user._id,
+                    content: req.body.content
+                });
 
-        var tweet = new Tweet({
-            author: user._id,
-            content: req.body.content,
-            extras: {
-                parentTweetId: req.body.tweet,
-                image: req.body.image,
-                url: req.body.url,
-                geo: req.body.geo
-            }
-        });
-
-        tweet.save(function (err) {
-            if (err) {
-                return next(err);
-            } else {
-                return res.status(200).json({status: 'OK', tweet: tweet});
-            }
-        });
-    });
+                tweet.save(function (err) {
+                    if (err) {
+                        return next(err);
+                    } else {
+                        return res.status(200).json({status: 'OK', tweet: tweet});
+                    }
+                });
+            });
 }
 
 function reTweet(req, res, next) {
@@ -44,29 +41,29 @@ function reTweet(req, res, next) {
             {socialNetworkId: req.user.socialNetworkId},
             {provider: req.user.provider}
         ]}, (err, user) => {
-        if (!User.isUser(req, res, err, user, next)) {
-            return;
-        }
+                if (!User.isUser(req, res, err, user, next)) {
+                    return;
+                }
 
-        var tweet = new Tweet({
-            author: user._id,
-            content: req.body.content,
-            extras: {
-                parentTweetId: parentTweetId,
-                image: req.body.image,
-                url: req.body.url,
-                geo: req.body.geo
-            }
-        });
+                var tweet = new Tweet({
+                    author: user._id,
+                    content: req.body.content,
+                    extras: {
+                        parentTweetId: parentTweetId,
+                        image: req.body.image,
+                        url: req.body.url,
+                        geo: req.body.geo
+                    }
+                });
 
-        tweet.save(function (err) {
-            if (err) {
-                return next(err);
-            } else {
-                return res.status(200).json({status: 'OK', tweet: tweet});
-            }
-        });
-    });
+                tweet.save(function (err) {
+                    if (err) {
+                        return next(err);
+                    } else {
+                        return res.status(200).json({status: 'OK', tweet: tweet});
+                    }
+                });
+            });
 }
 
 function commentTweet(req, res, next) {
@@ -202,45 +199,45 @@ function likeTweet(req, res, next) {
             {socialNetworkId: req.user.socialNetworkId},
             {provider: req.user.provider}
         ]}, (err, user) => {
-        if (!User.isUser(req, res, err, user, next)) {
-            return;
-        }
-
-        Tweet.findById(likeTweetId)
-            .exec((err, tweet) => {
-                if (err) {
-                    return next(err);
+                if (!User.isUser(req, res, err, user, next)) {
+                    return;
                 }
 
-                if (!tweet) {
-                    return res.status(404).json({status: 'Tweet not found'});
-                }
-
-                var index = tweet.extras.likes.indexOf(user._id);
-
-                if (req.query.like && (index === -1)) {
-                    tweet.extras.likes.push(user._id);
-                    tweet.save(function (err) {
+                Tweet.findById(likeTweetId)
+                    .exec((err, tweet) => {
                         if (err) {
                             return next(err);
                         }
 
-                        return res.status(200).json({like: true, likes: tweet.extras.likes.length});
-                    });
-                } else if (!(index === -1)) {
-                    tweet.extras.likes.splice(index, 1);
-                    tweet.save(function (err) {
-                        if (err) {
-                            return next(err);
+                        if (!tweet) {
+                            return res.status(404).json({status: 'Tweet not found'});
                         }
 
-                        return res.status(200).json({like: false, likes: tweet.extras.likes.length});
-                    });
-                }
+                        var index = tweet.extras.likes.indexOf(user._id);
 
-                //res.status(200).json({like: false, likes: tweet.extras.likes.length});
+                        if (req.query.like && (index === -1)) {
+                            tweet.extras.likes.push(user._id);
+                            tweet.save(function (err) {
+                                if (err) {
+                                    return next(err);
+                                }
+
+                                return res.status(200).json({like: true, likes: tweet.extras.likes.length});
+                            });
+                        } else if (!(index === -1)) {
+                            tweet.extras.likes.splice(index, 1);
+                            tweet.save(function (err) {
+                                if (err) {
+                                    return next(err);
+                                }
+
+                                return res.status(200).json({like: false, likes: tweet.extras.likes.length});
+                            });
+                        }
+
+                        //res.status(200).json({like: false, likes: tweet.extras.likes.length});
+                    });
             });
-    });
 }
 
 function deleteTweet(req, res, next) {
@@ -255,24 +252,24 @@ function deleteTweet(req, res, next) {
             {socialNetworkId: req.user.socialNetworkId},
             {provider: req.user.provider}
         ]}, (err, user) => {
-        if (!User.isUser(req, res, err, user, next)) {
-            return;
-        }
-
-        Tweet.findByIdAndRemove(deleteTweetId)
-            .where('author', user._id)
-            .exec((err, tweet) => {
-                if (err) {
-                    return next(err);
+                if (!User.isUser(req, res, err, user, next)) {
+                    return;
                 }
 
-                if (!tweet) {
-                    return res.status(404).json({status: 'Tweet not found'});
-                }
+                Tweet.findByIdAndRemove(deleteTweetId)
+                    .where('author', user._id)
+                    .exec((err, tweet) => {
+                        if (err) {
+                            return next(err);
+                        }
 
-                res.status(200).json(tweet);
+                        if (!tweet) {
+                            return res.status(404).json({status: 'Tweet not found'});
+                        }
+
+                        res.status(200).json(tweet);
+                    });
             });
-    });
 }
 
 module.exports = {
