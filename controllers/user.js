@@ -18,8 +18,8 @@ function user(req, res) {
         //provider: req.user.provider,
         isRegistered: req.user.isRegistered, //only if true
         firstName: req.user.firstName,
-        lastName: req.user.lastName
-        //avatar
+        lastName: req.user.lastName,
+        avatar: 'http://placehold.it/100x100'
         //descripion
 
     });

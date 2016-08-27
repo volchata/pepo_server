@@ -73,6 +73,8 @@ describe('User controller unit test', function () {
         var json = JSON.parse(response._getData());
         assert.equal(response.statusCode, 200);
         assert.equal(json.isRegistered, false);
+        assert.equal(json.avatar, 'http://placehold.it/100x100');
+
     });
     it('post displayName', function (done) {//done required for assinc asserts
         var data = {
