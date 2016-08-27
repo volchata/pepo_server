@@ -18,9 +18,8 @@ function user(req, res) {
         //provider: req.user.provider,
         firstName: req.user.firstName,
         lastName: req.user.lastName,
+        description: req.user.description,
         avatar: 'http://placehold.it/100x100'
-        //descripion
-
     };
     if (req.user.notRegistered) {
         data.notRegistered = true;
@@ -31,7 +30,7 @@ function user(req, res) {
 
 function postUser(req, res) {
     var modified = false;
-    for (var i of ['displayName', 'firstName', 'lastName']) {
+    for (var i of ['displayName', 'firstName', 'lastName', 'description']) {
         if (typeof req.body[i] !== 'undefined') {
             req.user[i] = String(req.body[i]).trim();
             modified = true;

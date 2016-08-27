@@ -182,6 +182,37 @@ describe('User controller unit test', function () {
 
     });
     it('get posted lastName', checkSaved);
+
+    it('post description', function (done) {//done required for assinc asserts
+        var data = {
+            method: 'POST',
+            url: '/api/user',
+            body: {
+                description: 'my very cool description'
+            }
+        };
+        var request = createRequest(data, user1);
+        var response = createResponse();
+        ctr.postUser(request, response);
+
+        response.on('end', function () {
+            //assert.equal(response._getRedirectUrl(), '/api/user');
+            //assert.equal(response.statusCode, 302);
+            assert.equal(response.statusCode, 200);
+            Json1.notRegistered = undefined;
+            Json1.description = 'my very cool description';
+            var json = JSON.parse(response._getData());
+            for (var i in Json1) {
+                if (!(i in skipCheck) || !skipCheck[i] ) {
+                    assert.equal(json[i], Json1[i]);
+                }
+            }
+
+            done();
+        });
+
+    });
+    it('get posted description', checkSaved);
     after(function (done) {
         clear();
         done();
