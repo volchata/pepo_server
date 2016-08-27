@@ -23,6 +23,7 @@ function setTweet(req, res, next) {
             if (err) {
                 return next(err);
             } else {
+                console.log("tweetSET", tweet);
                 return res.status(200).json({status: 'OK', tweet: tweet});
             }
         });
@@ -122,13 +123,19 @@ function commentTweet(req, res, next) {
 }
 
 function getTweets(req, res, next) {
-    User.findOne({displayName: req.params.login})
+    if(!req.params.login){
+        User.findOne({
+            $and: [
+                {socialNetworkId: req.user.socialNetworkId},
+                {provider: req.user.provider}
+            ]
+        })
         .populate('folowers')
         .exec((err, user) => {
             if (!User.isUser(req, res, err, user, next)) {
                 return;
             }
-
+            console.log("user", user);
             var folowers = user.folowers.map(folower => folower._id);
             folowers.push(user._id);
 
@@ -146,7 +153,9 @@ function getTweets(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        res.status(200).json({status: 'OK', tweets});
+                        parseTweet(tweets, (o) => {
+                            res.status(200).json(o);    
+                        })                        
                     }
                 });
             } else {
@@ -162,11 +171,14 @@ function getTweets(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        res.status(200).json({status: 'OK', tweets});
+                        parseTweet(tweets, (o) => {
+                            res.status(200).json(o);    
+                        })
                     }
                 });
             }
         });
+    }
 }
 
 function getTweet(req, res, next) {
@@ -270,6 +282,27 @@ function deleteTweet(req, res, next) {
                         res.status(200).json(tweet);
                     });
     });
+}
+
+
+function parseTweet(tweets, cb){
+    var users = {};
+    tweets.forEach(t => { users[t.author] = null;} );
+    console.log("users", Object.keys(users));
+
+    User.find({_id: {$in: Object.keys(users)}})
+            .exec((err, authors) => {
+            if (err) {
+                return next(err);
+            }
+
+            console.log("authors", authors);
+            authors.forEach(u => {
+                users[u._id] = u;
+            })
+
+            cb( {tweets: tweets, users: users} );
+        });
 }
 
 module.exports = {

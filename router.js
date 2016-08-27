@@ -25,7 +25,22 @@ apiRouter
     .use(controllers.cors)
 
     .get('/user', controllers.user.user)
+<<<<<<< 2590b6e055e21c59dac7f234e6788b96a797d9dd
     .post('/user', controllers.user.postUser);
+=======
+    .use('/user/*', controllers.currentUser)
+    .get('/users', controllers.user.getUsers)
+    //.post('/api/user', controllers.user.postUser)
+
+    .get('/users/:login/feed', controllers.tweet.getTweets)
+    .get('/user/feed', controllers.tweet.getTweets)
+    .get('/tweet/:id', controllers.tweet.getTweet)
+    .post('/user/feed', controllers.tweet.setTweet)
+    .post('/tweet/:id/retweet', controllers.tweet.reTweet)
+    .post('/tweet/:id', controllers.tweet.commentTweet)
+    .post('/tweet/:id/like', controllers.tweet.likeTweet)
+    .delete('/tweet/:id', controllers.tweet.deleteTweet);
+>>>>>>> refactoring getTweets
 
 module.exports = function (app) {
     app
