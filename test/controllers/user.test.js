@@ -27,14 +27,14 @@ describe('User controller unit test', function () {
     var Json1 = {
         provider: 'testprovider',
         socialNetworkId: 1,
-        isRegistered: false,
+        notRegistered: true,
         displayName: 'testprovider_1'
     };
     var user2;
     var Json2 = {
         provider: 'testprovider',
         socialNetworkId: 2,
-        isRegistered: true,
+        notRegistered: false,
         displayName: 'testprovider_2'
     };
     var skipCheck = {
@@ -72,7 +72,7 @@ describe('User controller unit test', function () {
         ctr.user(request, response);
         var json = JSON.parse(response._getData());
         assert.equal(response.statusCode, 200);
-        assert.equal(json.isRegistered, false);
+        assert.equal(json.notRegistered, true);
         assert.equal(json.avatar, 'http://placehold.it/100x100');
 
     });
@@ -92,7 +92,7 @@ describe('User controller unit test', function () {
             //assert.equal(response._getRedirectUrl(), '/api/user');
             //assert.equal(response.statusCode, 302);
             assert.equal(response.statusCode, 200);
-            Json1.isRegistered = true;
+            Json1.notRegistered = undefined;
             Json1.displayName = 'newDisplayName';
             var json = JSON.parse(response._getData());
             for (var i in Json1) {
@@ -142,7 +142,7 @@ describe('User controller unit test', function () {
             //assert.equal(response._getRedirectUrl(), '/api/user');
             //assert.equal(response.statusCode, 302);
             assert.equal(response.statusCode, 200);
-            Json1.isRegistered = true;
+            Json1.isRegistered = undefined;
             Json1.firstName = 'newFirstName';
             var json = JSON.parse(response._getData());
             for (var i in Json1) {
@@ -169,7 +169,7 @@ describe('User controller unit test', function () {
 
         response.on('end', function () {
             assert.equal(response.statusCode, 200);
-            Json1.isRegistered = true;
+            Json1.notRegistered = undefined;
             Json1.lastName = 'newLastName';
             var json = JSON.parse(response._getData());
             for (var i in Json1) {

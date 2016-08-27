@@ -12,17 +12,21 @@ function getUsers(req, res, next) {
 }
 
 function user(req, res) {
-    res.json({
+    var data = {
         displayName: req.user.displayName,
         //socialNetworkId: req.user.socialNetworkId,
         //provider: req.user.provider,
-        isRegistered: req.user.isRegistered, //only if true
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         avatar: 'http://placehold.it/100x100'
         //descripion
 
-    });
+    };
+    if (req.user.notRegistered) {
+        data.notRegistered = true;
+    }
+
+    res.json(data);
 }
 
 function postUser(req, res) {
@@ -35,7 +39,7 @@ function postUser(req, res) {
     }
 
     if (modified) {
-        req.user.isRegistered = true;
+        req.user.notRegistered = false;
         req.user.save(function (err) {
             if (err) {
                 if ( err.code === 11000 ) {
