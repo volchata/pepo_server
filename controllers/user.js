@@ -1,15 +1,5 @@
 'use strict';
 
-var User = require('../models/user').User;
-
-function getUsers(req, res, next) {
-    User.find({}, (err, users) => {
-        if (err) {
-            return next(err);
-        }
-        res.json(users);
-    });
-}
 function userToData(user) {
     var data = {
         displayName: user.displayName,
@@ -60,14 +50,8 @@ function postUser(req, res) {
 
 }
 
-function stub(req, res) {
-    res.json({stub: 'data'});
-}
-
 module.exports = {
-    getUsers,
     user,
-    stub,
     postUser,
     userToData
 };
