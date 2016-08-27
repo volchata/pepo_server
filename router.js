@@ -20,10 +20,10 @@ commonRouter        // роутер для обычных путей аутен�
     .get('/feed', rproxy)
     .get('/signup/', rproxy);
 
-apiRouter                                  
-    .use(controllers.auth.ensureAuthenticatedAPI) 
-    .use(controllers.cors)                  
-                                            
+apiRouter
+    .use(controllers.auth.ensureAuthenticatedAPI)
+    .use(controllers.cors)
+
     .get('/user', controllers.user.user)
     .post('/user', controllers.user.postUser);
 

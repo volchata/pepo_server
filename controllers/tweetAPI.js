@@ -10,23 +10,23 @@ function setTweet(req, res, next) {
             {socialNetworkId: req.user.socialNetworkId},
             {provider: req.user.provider}
         ]}, (err, user) => {
-                if (!User.isUser(req, res, err, user, next)) {
-                    return;
-                }
+        if (!User.isUser(req, res, err, user, next)) {
+            return;
+        }
 
-                var tweet = new Tweet({
-                    author: user._id,
-                    content: req.body.content
-                });
+        var tweet = new Tweet({
+            author: user._id,
+            content: req.body.content
+        });
 
-                tweet.save(function (err) {
-                    if (err) {
-                        return next(err);
-                    } else {
-                        return res.status(200).json({status: 'OK', tweet: tweet});
-                    }
-                });
-            });
+        tweet.save(function (err) {
+            if (err) {
+                return next(err);
+            } else {
+                return res.status(200).json({status: 'OK', tweet: tweet});
+            }
+        });
+    });
 }
 
 function reTweet(req, res, next) {
@@ -41,29 +41,29 @@ function reTweet(req, res, next) {
             {socialNetworkId: req.user.socialNetworkId},
             {provider: req.user.provider}
         ]}, (err, user) => {
-                if (!User.isUser(req, res, err, user, next)) {
-                    return;
-                }
+        if (!User.isUser(req, res, err, user, next)) {
+            return;
+        }
 
-                var tweet = new Tweet({
-                    author: user._id,
-                    content: req.body.content,
-                    extras: {
-                        parentTweetId: parentTweetId,
-                        image: req.body.image,
-                        url: req.body.url,
-                        geo: req.body.geo
-                    }
-                });
+        var tweet = new Tweet({
+            author: user._id,
+            content: req.body.content,
+            extras: {
+                parentTweetId: parentTweetId,
+                image: req.body.image,
+                url: req.body.url,
+                geo: req.body.geo
+            }
+        });
 
-                tweet.save(function (err) {
-                    if (err) {
-                        return next(err);
-                    } else {
-                        return res.status(200).json({status: 'OK', tweet: tweet});
-                    }
-                });
-            });
+        tweet.save(function (err) {
+            if (err) {
+                return next(err);
+            } else {
+                return res.status(200).json({status: 'OK', tweet: tweet});
+            }
+        });
+    });
 }
 
 function commentTweet(req, res, next) {
@@ -199,11 +199,11 @@ function likeTweet(req, res, next) {
             {socialNetworkId: req.user.socialNetworkId},
             {provider: req.user.provider}
         ]}, (err, user) => {
-                if (!User.isUser(req, res, err, user, next)) {
-                    return;
-                }
+        if (!User.isUser(req, res, err, user, next)) {
+            return;
+        }
 
-                Tweet.findById(likeTweetId)
+        Tweet.findById(likeTweetId)
                     .exec((err, tweet) => {
                         if (err) {
                             return next(err);
@@ -237,7 +237,7 @@ function likeTweet(req, res, next) {
 
                         //res.status(200).json({like: false, likes: tweet.extras.likes.length});
                     });
-            });
+    });
 }
 
 function deleteTweet(req, res, next) {
@@ -252,11 +252,11 @@ function deleteTweet(req, res, next) {
             {socialNetworkId: req.user.socialNetworkId},
             {provider: req.user.provider}
         ]}, (err, user) => {
-                if (!User.isUser(req, res, err, user, next)) {
-                    return;
-                }
+        if (!User.isUser(req, res, err, user, next)) {
+            return;
+        }
 
-                Tweet.findByIdAndRemove(deleteTweetId)
+        Tweet.findByIdAndRemove(deleteTweetId)
                     .where('author', user._id)
                     .exec((err, tweet) => {
                         if (err) {
@@ -269,7 +269,7 @@ function deleteTweet(req, res, next) {
 
                         res.status(200).json(tweet);
                     });
-            });
+    });
 }
 
 module.exports = {
