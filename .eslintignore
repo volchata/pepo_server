@@ -1,5 +1,6 @@
 node_modules
 libs
+storage
 *bundles/**
 static
 **/*.deps.js

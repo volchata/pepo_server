@@ -3,6 +3,7 @@
 var mongoose = require('../libs/mongoose-connect');
 mongoose.Promise = global.Promise;
 var Schema = mongoose.Schema;
+var User;
 
 var schema = new Schema({
 
@@ -60,14 +61,15 @@ schema.statics.isUser = function (req, res, err, user, next) {
 
 schema.statics.getByReq = function (req, res, next, mod) {
     var q = User.findOne({
-            $and: [
+        $and: [
                 {socialNetworkId: req.user.socialNetworkId},
                 {provider: req.user.provider}
-            ]
-        });
+        ]
+    });
 
-    if (mod instanceof Function)
+    if (mod instanceof Function) {
         mod(q);
+    }
 
     return q.exec((err, user)=>{
         if (err) {
@@ -85,5 +87,5 @@ schema.statics.getByReq = function (req, res, next, mod) {
 
 };
 
-exports.User = mongoose.model('User', schema);
+User = exports.User = mongoose.model('User', schema);
 exports.Mongoose = mongoose;

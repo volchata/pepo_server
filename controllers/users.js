@@ -30,7 +30,7 @@ function foreignUserToData(user) {
  * @param res
  * @param next
  */
-    function getUserByLogin(req, res, next) {
+function getUserByLogin(req, res, next) {
     var displayName = req.params.login;
     User.byDisplayname(displayName).exec( function (err, user) {
         if (err) {

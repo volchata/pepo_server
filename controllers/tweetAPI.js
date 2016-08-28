@@ -136,7 +136,9 @@ function getTweets(req, res, next) {
         //     if (!User.isUser(req, res, err, user, next)) {
         //         return;
         //     }
-        User.getByReq(req, res, next, (q)=>{q.populate('folowers')}).then((user) => {
+        User.getByReq(req, res, next, (q)=>{
+            q.populate('folowers');
+        }).then((user) => {
             console.log('user', user);
             var folowers = user.folowers.map(folower => folower._id);
             folowers.push(user._id);

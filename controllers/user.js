@@ -1,6 +1,18 @@
 'use strict';
 
 var User = require('../models/user').User;
+var controllers = require('../controllers');
+var webPref = require('../conf').get('storage:web');
+var localImg = new RegExp( textEscapeForRE(webPref), 'i');
+var img;
+
+setImmediate(()=>{
+    img = controllers.images; // циклические зависимости и отложенное подключение модулей
+});
+
+function textEscapeForRE(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&').replace(/\n|\r|\n\r|\r\n/g, '');
+}
 
 function userToData(user) {
     var data = {
@@ -10,7 +22,7 @@ function userToData(user) {
         firstName: user.firstName,
         lastName: user.lastName,
         description: user.description,
-        avatar: 'http://placehold.it/100x100',
+        avatar: user.avatar ? user.avatar : 'http://placehold.it/100x100',
         folowers: user.folowers.length
     };
     if (user.notRegistered) {
@@ -18,7 +30,6 @@ function userToData(user) {
     }
     return data;
 }
-
 
 /**
  * @api {get} /api/user Get user profile
@@ -67,10 +78,21 @@ function postUser(req, res) {
         }
     }
 
+    if (req.file) {
+        modified = true;
+        if (localImg.test(req.user.avatar)) {
+            img.removeFile(req.user.avatar); // не ждём завершения процесса
+        }
+        req.user.avatar = req.file.url;
+    }
+
     if (modified) {
         req.user.notRegistered = false;
         data.notRegistered = false;
         req.user.save(function (err) {
+            if (req.file) {
+                req.file.dbo.commit();
+            }
             if (err) {
                 if ( err.code === 11000 ) {
                     res.status(409).send({status: 'Duplicate key'});
