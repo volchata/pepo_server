@@ -148,7 +148,7 @@ describe('User controller unit test', function () {
             var JsonI;
             for (var i = 0; i < 300; i++) {
                 JsonI = Object.assign({}, Json1);
-                JsonI.isRegistered = true;
+                JsonI.notRegistered = false;
                 JsonI.displayName = 'follower_' + i;
                 Json1.socialNetworkId = 1000 + i;
                 folowers[i] = new User(JsonI);
@@ -178,7 +178,36 @@ describe('User controller unit test', function () {
 
         });
     });
+    describe('user search', function () {
+        var users = [];
+        it('search user', function (done) {
+            var JsonI;
+            for (var i = 0; i < 300; i++) {
+                JsonI = Object.assign({}, Json1);
+                JsonI.notRegistered = false;
+                JsonI.displayName = 'follower_' + i;
+                Json1.socialNetworkId = 1000 + i;
+                users[i] = new User(JsonI);
+                users[i].save();
 
+            }
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/users/search/folow',
+                params: {search: 'fol'}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.searchUsers(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.length, 10);
+
+                done();
+            });
+
+        });
+    });
     after(function (done) {
         clear();
         done();

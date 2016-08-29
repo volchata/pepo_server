@@ -79,8 +79,23 @@ function getUserChildCollection(child, mapBy) {
 var getUserFolowers = getUserChildCollection('folowers', foreignUserToData);
 //var getUserFolowed=getUserChildCollection('followed',getUserByLogin);
 
+function searchUsers(req, res, next) {
+    var search = req.params.search.trim();
+    User.search(search).limit(10).exec(
+        function (err, users) {
+            if (err) {
+                next(err);
+            } else if ((!users) || users.length === 0) {
+                res.status(404).send({status: 'Not found'});
+            } else {
+                res.json(users.map(foreignUserToData));
+            }}
+    );
+}
+
 module.exports = {
     foreignUserToData,
     getUserByLogin,
-    getUserFolowers
+    getUserFolowers,
+    searchUsers
 };
