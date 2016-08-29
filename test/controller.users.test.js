@@ -150,7 +150,7 @@ describe('User controller unit test', function () {
                 JsonI = Object.assign({}, Json1);
                 JsonI.notRegistered = false;
                 JsonI.displayName = 'follower_' + i;
-                Json1.socialNetworkId = 1000 + i;
+                JsonI.socialNetworkId = 1000 + i;
                 followers[i] = new User(JsonI);
                 followers[i].save();
 
@@ -193,7 +193,7 @@ describe('User controller unit test', function () {
             }
             var request = createRequest({
                 method: 'GET',
-                url: '/api/users/search/folow',
+                url: '/api/users/search/fol',
                 params: {search: 'fol'}
             }, user1);
             var response = createResponse();
@@ -208,6 +208,71 @@ describe('User controller unit test', function () {
 
         });
     });
+    describe('user follows', function () {
+        var follows = [];
+        it('get follows of unexistedUser', function (done) {
+            var login = 'ThisGameHasNoName' + (new Date());
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/user/' + login + '/follows',
+                params: {login}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.getUserFollows(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 404);
+                done();
+            });
+        });
+        it('user1 has no follows. get follows', function (done) {
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/user/' + Json1.displayName + '/follows',
+                params: {login: Json1.displayName}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.getUserFollows(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 204);
+                done();
+            });
+        });
+
+        it('user1 has 300 follows. get follows', function (done) {
+            var JsonI;
+            for (var i = 0; i < 300; i++) {
+                JsonI = Object.assign({}, Json1);
+                JsonI.isRegistered = true;
+                JsonI.displayName = 'follower_' + 2000 + i;
+                JsonI.socialNetworkId = 2000 + i;
+                follows[i] = new User(JsonI);
+                follows[i].save();
+
+            }
+            user1.follows = follows;
+            user1.save(function (err, user1) {
+
+                var request = createRequest({
+                    method: 'GET',
+                    url: '/api/user/' + Json1.displayName + '/follows',
+                    params: {login: Json1.displayName}
+                }, user1);
+                var response = createResponse();
+                ctrUsers.getUserFollows(request, response);
+                response.on('end', function () {
+                    assert.equal(response.statusCode, 200);
+                    var json = JSON.parse(response._getData());
+                    assert.equal(json.limit, 50);
+                    assert.equal(json.offset, 0);
+                    assert.equal(json.data.length, 50);
+                    assert.equal(json.total, 300);
+                    done();
+                });
+            });
+
+        });
+    });
+
     after(function (done) {
         clear();
         done();

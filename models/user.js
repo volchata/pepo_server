@@ -37,6 +37,7 @@ var schema = new Schema({
         type: String
     },
     followers: [{type: Schema.Types.ObjectId, ref: 'User'}],
+    follows: [{type: Schema.Types.ObjectId, ref: 'User'}],
     friends: [{type: Schema.Types.ObjectId, ref: 'User'}]
 
 });

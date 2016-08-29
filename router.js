@@ -44,6 +44,7 @@ apiRouter
     .get('/users/:login', controllers.users.getUserByLogin)
     .get('/users/:login/feed', controllers.tweet.getTweets)
     .get('/users/:login/followers', controllers.limitData, controllers.users.getUserFollowers)
+    .get('/users/:login/follows', controllers.limitData, controllers.users.getUserFollows)
     .get('/user/feed', controllers.tweet.getTweets)
     .get('/tweet/:id', controllers.tweet.getTweet)
     .post('/user/feed', img.preAdd('image'), controllers.tweet.setTweet)
