@@ -125,17 +125,20 @@ function commentTweet(req, res, next) {
 
 function getTweets(req, res, next) {
     if (!req.params.login) {
-        User.findOne({
-            $and: [
-                {socialNetworkId: req.user.socialNetworkId},
-                {provider: req.user.provider}
-            ]
-        })
-        .populate('folowers')
-        .exec((err, user) => {
-            if (!User.isUser(req, res, err, user, next)) {
-                return;
-            }
+        // User.findOne({
+        //     $and: [
+        //         {socialNetworkId: req.user.socialNetworkId},
+        //         {provider: req.user.provider}
+        //     ]
+        // })
+        // .populate('folowers')
+        // .exec((err, user) => {
+        //     if (!User.isUser(req, res, err, user, next)) {
+        //         return;
+        //     }
+        User.getByReq(req, res, next, (q)=>{
+            q.populate('folowers');
+        }).then((user) => {
             console.log('user', user);
             var folowers = user.folowers.map(folower => folower._id);
             folowers.push(user._id);

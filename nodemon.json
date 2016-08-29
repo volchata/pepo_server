@@ -1,0 +1,6 @@
+{
+  "verbose": true,
+  "ignore": ["storage", "*.log"],
+  "execMap": {  },
+  "delay":4000
+}

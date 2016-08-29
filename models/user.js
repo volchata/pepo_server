@@ -3,6 +3,7 @@
 var mongoose = require('../libs/mongoose-connect');
 mongoose.Promise = global.Promise;
 var Schema = mongoose.Schema;
+var User;
 
 var schema = new Schema({
 
@@ -35,7 +36,6 @@ var schema = new Schema({
     friends: [{type: Schema.Types.ObjectId, ref: 'User'}]
 
 });
-schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 
 schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 
@@ -59,5 +59,33 @@ schema.statics.isUser = function (req, res, err, user, next) {
     return true;
 };
 
-exports.User = mongoose.model('User', schema);
+schema.statics.getByReq = function (req, res, next, mod) {
+    var q = User.findOne({
+        $and: [
+                {socialNetworkId: req.user.socialNetworkId},
+                {provider: req.user.provider}
+        ]
+    });
+
+    if (mod instanceof Function) {
+        mod(q);
+    }
+
+    return q.exec((err, user)=>{
+        if (err) {
+            next(err);
+            return false;
+        }
+
+        if (!user) {
+            res.status(404).json({status: 'User not found'});
+            return false;
+        }
+
+        return user;
+    });
+
+};
+
+User = exports.User = mongoose.model('User', schema);
 exports.Mongoose = mongoose;

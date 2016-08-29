@@ -39,7 +39,7 @@ passport.use(new FacebookStrategy({
         callbackURL: callbackUrlPrefix+"/auth/fb/callback",
         profileFields: [
             'id',
-            'displayName',
+            'displayName'
         ]
     },
     authenticate
@@ -53,20 +53,6 @@ passport.use(new VKontakteStrategy ({
     },
     authenticate
 ));
- /*
-passport.serializeUser(function (user, done) {
-    done(null, JSON.stringify(user));
-});
- 
- 
-passport.deserializeUser(function (data, done) {
-    try {
-        done(null, JSON.parse(data));
-    } catch (e) {
-        done(err)
-    }
-});
-*/
 
 passport.serializeUser(function(user, done) {
     done(null, user.id);

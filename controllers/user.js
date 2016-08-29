@@ -1,5 +1,19 @@
 'use strict';
-//var User = require('../models/').User;
+
+var User = require('../models/user').User;
+var controllers = require('../controllers');
+var webPref = require('../conf').get('storage:web');
+var localImg = new RegExp( textEscapeForRE(webPref), 'i');
+var img;
+
+setImmediate(()=>{
+    img = controllers.images; // циклические зависимости и отложенное подключение модулей
+});
+
+function textEscapeForRE(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&').replace(/\n|\r|\n\r|\r\n/g, '');
+}
+
 function userToData(user) {
     var data = {
         displayName: user.displayName,
@@ -8,7 +22,8 @@ function userToData(user) {
         firstName: user.firstName,
         lastName: user.lastName,
         description: user.description,
-        avatar: 'http://placehold.it/100x100'
+        avatar: user.avatar ? user.avatar : 'http://placehold.it/100x100',
+        folowers: user.folowers.length
     };
     if (user.notRegistered) {
         data.notRegistered = true;
@@ -34,6 +49,7 @@ function userToData(user) {
 function user(req, res) {
     res.json(userToData(req.user));
 }
+
 /**
  * @api {post} /api/user Update user profile
  * @apiGroup User
@@ -62,23 +78,21 @@ function postUser(req, res) {
         }
     }
 
+    if (req.file) {
+        modified = true;
+        if (localImg.test(req.user.avatar)) {
+            img.removeFile(req.user.avatar); // не ждём завершения процесса
+        }
+        req.user.avatar = req.file.url;
+    }
+
     if (modified) {
         req.user.notRegistered = false;
         data.notRegistered = false;
-        /*User.findOneAndUpdate({_id: req.user._id}, {$set: data}, {new: true}, function (err, user) {
-            if (err) {
-                if ( err.code === 11000 ) {
-                    res.status(409).send({status: 'Duplicate key'});
-                } else {
-                    res.status(400).send({status: 'Error saving data'});
-                }
-
-            } else {
-                //res.redirect('/api/user');
-                res.json(userToData(user));
-            }
-        });*/
         req.user.save(function (err) {
+            if (req.file) {
+                req.file.dbo.commit();
+            }
             if (err) {
                 if ( err.code === 11000 ) {
                     res.status(409).send({status: 'Duplicate key'});
@@ -87,19 +101,61 @@ function postUser(req, res) {
                 }
 
             } else {
-                //res.redirect('/api/user');
                 user(req, res);
             }
         });
     } else {
-        //res.redirect('/api/user');
         user(req, res);
     }
 
 }
 
+function followUser(req, res, next) {
+
+    var flogin = req.param.login;
+
+    User.getByLogin( flogin, res, next).then( (fuser) => {
+
+        var sid = req.user._id;
+        var func = {followers: req.user._id};
+        // console.log('Sid', sid, fuser.followers);
+
+        if (req.method === 'POST') {
+            if (fuser.followers.indexOf(sid) > -1) {
+                return res.json(userToData(fuser));
+            }
+            func = {$push: func};
+        } else if (req.method === 'DELETE') {
+            if (fuser.followers.indexOf(sid) === -1) {
+                return res.json(userToData(fuser));
+            }
+            func = {$pull: func};
+        }
+
+        User.findOneAndUpdate(
+            {
+                displayName: flogin,
+                notRegistered: false
+            },
+            func,
+            function (err, user) {
+                if (err) {
+                    return next(err);
+                }
+                if (user) {
+                    return res.json(userToData(user));
+                } else {
+                    res.status(404).json({status: 'User not found'});
+                }
+            }
+        );
+
+    } );
+}
+
 module.exports = {
     user,
     postUser,
-    userToData
+    userToData,
+    followUser
 };

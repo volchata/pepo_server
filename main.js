@@ -11,7 +11,7 @@ var passport = require('passport');
 var config = require('./conf');
 
 // в среде тестирования это не выводим
-if (process.env.NODE_ENV !== 'test') {
+if (/test/.test(process.env.NODE_ENV)) {
     app.use(morgan('combined'));
 }
 

@@ -16,9 +16,11 @@
     "express": "^4.14.0",
     "express-session": "^1.14.0",
     "http-proxy": "^1.14.0",
+    "mkdirp": "^0.5.1",
     "mongoose": "^4.5.8",
     "mongoose-paginate": "^5.0.0",
     "morgan": "^1.7.0",
+    "multer": "^1.2.0",
     "nconf": "^0.8.4",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
@@ -48,7 +50,8 @@
     "fix1": "eslint --fix ",
     "lint1": "eslint ",
     "test": "node_modules/.bin/mocha",
-    "doc": "node_modules/.bin/apidoc  -i controllers -o apidoc"
+    "doc": "node_modules/.bin/apidoc  -i controllers -o apidoc",
+    "ever": "node_modules/.bin/nodemon"
   },
   "main": "main.js"
 }
