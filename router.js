@@ -3,7 +3,6 @@
 var express = require('express');
 var apiRouter = express.Router();
 var commonRouter = express.Router();
-var staticRouter = express.Router();
 var controllers = require('./controllers');
 var rproxy = require('./libs/rproxy');
 
@@ -43,7 +42,6 @@ apiRouter
 
 module.exports = function (app) {
     app
-        .use(staticRouter)
         .use('/api', apiRouter)
         .use(commonRouter);
 };
