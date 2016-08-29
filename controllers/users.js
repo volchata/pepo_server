@@ -76,8 +76,8 @@ function getUserChildCollection(child, mapBy) {
             }});
     };
 }
-var getUserFolowers = getUserChildCollection('folowers', foreignUserToData);
-//var getUserFolowed=getUserChildCollection('followed',getUserByLogin);
+var getUserFollowers = getUserChildCollection('followers', foreignUserToData);
+//var getUserfollowed=getUserChildCollection('followed',getUserByLogin);
 
 function searchUsers(req, res, next) {
     var search = req.params.search.trim();
@@ -96,6 +96,6 @@ function searchUsers(req, res, next) {
 module.exports = {
     foreignUserToData,
     getUserByLogin,
-    getUserFolowers,
+    getUserFollowers,
     searchUsers
 };

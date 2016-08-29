@@ -153,15 +153,15 @@ function commentTweet(req, res, next) {
 function getTweets(req, res, next) {
     if (!req.params.login) {
         User.getByReq(req, res, next, (q)=>{
-            q.populate('folowers');
+            q.populate('followers');
         }).then((user) => {
-            var folowers = user.folowers.map(folower => folower._id);
-            folowers.push(user._id);
+            var followers = user.followers.map(follower => follower._id);
+            followers.push(user._id);
 
             if (req.query.offset) {
                 Tweet.find({
                     $and: [
-                        {author: {$in: folowers}},
+                        {author: {$in: followers}},
                         {'extras.commentedTweetId': {$exists: false}},
                         {timestamp: {$gte: req.query.offset}}
                     ]
@@ -180,7 +180,7 @@ function getTweets(req, res, next) {
             } else {
                 Tweet.find({
                     $and: [
-                        {author: {$in: folowers}},
+                        {author: {$in: followers}},
                         {'extras.commentedTweetId': {$exists: false}}
                     ]
                 })
@@ -346,8 +346,16 @@ function parseTweet(tweets, next, cb, user) {
         var isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
         var isRetweeted = tweet.extras.retweets.some(x => x.toString() === user._id.toString());
 
-        isLiked ? (tweet.like = true) : (tweet.like = false);
-        isRetweeted ? (tweet.retweet = true) : (tweet.retweet = false);
+        if (isLiked) {
+            tweet.like = true;
+        } else {
+            tweet.like = false;
+        }
+        if (isRetweeted) {
+            tweet.retweet = true;
+        } else {
+            tweet.retweet = false;
+        }
 
         return tweet;
     });
