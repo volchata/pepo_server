@@ -39,6 +39,12 @@ schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 
 schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 
+schema.statics.byDisplayname = function (displayName) {
+    return this.findOne({
+        $and: [{displayName: displayName}, {notRegistered: false}]
+    });
+};
+
 schema.statics.isUser = function (req, res, err, user, next) {
     if (err) {
         next(err);

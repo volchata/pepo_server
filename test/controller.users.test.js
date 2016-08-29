@@ -114,6 +114,70 @@ describe('User controller unit test', function () {
         });
 
     });
+    describe('user folowers', function () {
+        var folowers = [];
+        it('get folowers of unexistedUser', function (done) {
+            var login = 'ThisGameHasNoName' + (new Date());
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/user/' + login + '/folower',
+                params: {login}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.getUserFolowers(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 404);
+                done();
+            });
+        });
+        it('user1 has no folowers. get folowers', function (done) {
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/user/' + Json1.displayName + '/folower',
+                params: {login: Json1.displayName}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.getUserFolowers(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 204);
+                done();
+            });
+        });
+
+        it('user1 has 300 folowers. get folowers', function (done) {
+            var JsonI;
+            for (var i = 0; i < 300; i++) {
+                JsonI = Object.assign({}, Json1);
+                JsonI.isRegistered = true;
+                JsonI.displayName = 'follower_' + i;
+                Json1.socialNetworkId = 1000 + i;
+                folowers[i] = new User(JsonI);
+                folowers[i].save();
+
+            }
+            user1.folowers = folowers;
+            user1.save(function (err, user1) {
+
+                var request = createRequest({
+                    method: 'GET',
+                    url: '/api/user/' + Json1.displayName + '/folower',
+                    params: {login: Json1.displayName}
+                }, user1);
+                var response = createResponse();
+                ctrUsers.getUserFolowers(request, response);
+                response.on('end', function () {
+                    assert.equal(response.statusCode, 200);
+                    var json = JSON.parse(response._getData());
+                    assert.equal(json.limit, 50);
+                    assert.equal(json.offset, 0);
+                    assert.equal(json.data.length, 50);
+                    assert.equal(json.total, 300);
+                    done();
+                });
+            });
+
+        });
+    });
 
     after(function (done) {
         clear();

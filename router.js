@@ -28,6 +28,7 @@ apiRouter
     .post('/user', controllers.user.postUser)
     .get('/users/:login', controllers.users.getUserByLogin)
     .get('/users/:login/feed', controllers.tweet.getTweets)
+    .get('/users/:login/folowers', controllers.limitData, controllers.users.getUserFolowers)
     .get('/user/feed', controllers.tweet.getTweets)
     .get('/tweet/:id', controllers.tweet.getTweet)
     .post('/user/feed', controllers.tweet.setTweet)
