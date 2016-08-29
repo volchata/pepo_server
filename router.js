@@ -7,6 +7,7 @@ var controllers = require('./controllers');
 var rproxy = require('./libs/rproxy');
 
 commonRouter        // роутер для обычных путей аутентификации
+    .use('/doc/api', express.static('apidoc'))
     .get('/auth/', rproxy)
     .get('/auth/vk', controllers.auth.authVK)
     .get('/auth/vk/callback', controllers.auth.authVK)
