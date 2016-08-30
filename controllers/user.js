@@ -17,9 +17,15 @@ function userToData(user) {
         firstName: user.firstName,
         lastName: user.lastName,
         description: user.description,
-        avatar: user.avatar ? user.avatar : 'http://placehold.it/100x100',
-        folowers: user.folowers.length
+        avatar: user.avatar ? user.avatar : 'http://placehold.it/100x100'
     };
+    if (typeof user.followers !== 'undefined') {
+        data.followers = user.followers.length;
+    }
+    if (typeof user.follows !== 'undefined') {
+        data.follows = user.follows.length;
+    }
+
     if (user.notRegistered) {
         data.notRegistered = true;
     }
