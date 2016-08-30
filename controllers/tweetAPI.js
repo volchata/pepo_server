@@ -3,7 +3,7 @@
 var Tweet = require('../models/tweet').Tweet;
 var User = require('../models/user').User;
 var mongoose = require('mongoose');
-var user = require('./user');
+var userFilter = require('./user');
 
 function setTweet(req, res, next) {
     User.findOne({
@@ -24,8 +24,9 @@ function setTweet(req, res, next) {
             if (err) {
                 return next(err);
             } else {
-                console.log('tweetSET', tweet);
-                return res.status(200).json({status: 'OK', tweet: tweet});
+                parseTweet(tweet, next, (o) => {
+                    res.status(200).json(o);
+                }, user);
             }
         });
     });
@@ -43,28 +44,52 @@ function reTweet(req, res, next) {
             {socialNetworkId: req.user.socialNetworkId},
             {provider: req.user.provider}
         ]}, (err, user) => {
+
         if (!User.isUser(req, res, err, user, next)) {
             return;
         }
 
-        var tweet = new Tweet({
-            author: user._id,
-            content: req.body.content,
-            extras: {
-                parentTweetId: parentTweetId,
-                image: req.body.image,
-                url: req.body.url,
-                geo: req.body.geo
-            }
-        });
+        Tweet.findById(parentTweetId)
+                .exec((err, parentTweet) => {
+                    if (err) {
+                        return next(err);
+                    }
 
-        tweet.save(function (err) {
-            if (err) {
-                return next(err);
-            } else {
-                return res.status(200).json({status: 'OK', tweet: tweet});
-            }
-        });
+                    if (!parentTweet) {
+                        return res.status(404).json({status: 'Tweet not found'});
+                    }
+
+                    var isRetweet = parentTweet.extras.retweets.some(x => x.toString() === user._id.toString());
+
+                    if (!isRetweet) {
+                        var tweet = new Tweet({
+                            author: user._id,
+                            content: req.body.content,
+                            extras: {
+                                parentTweetId: parentTweetId
+                            }
+                        });
+
+                        tweet.save(function (err) {
+                            if (err) {
+                                return next(err);
+                            } else {
+                                parseTweet(tweet, next, (o) => {
+                                    res.status(200).json(o);
+                                }, user);
+                            }
+                        });
+
+                        parentTweet.extras.retweets.push(user._id);
+                        parentTweet.save(function (err) {
+                            if (err) {
+                                return next(err);
+                            }
+                        });
+                    } else {
+                        res.status(200).json({status: 'Already retweeted'});
+                    }
+                });
     });
 }
 
@@ -109,7 +134,9 @@ function commentTweet(req, res, next) {
                 if (err) {
                     return next(err);
                 } else {
-                    return res.status(200).json({status: 'OK', tweet: tweet});
+                    parseTweet(tweet, next, (o) => {
+                        res.status(200).json(o);
+                    }, user);
                 }
             });
 
@@ -125,21 +152,9 @@ function commentTweet(req, res, next) {
 
 function getTweets(req, res, next) {
     if (!req.params.login) {
-        // User.findOne({
-        //     $and: [
-        //         {socialNetworkId: req.user.socialNetworkId},
-        //         {provider: req.user.provider}
-        //     ]
-        // })
-        // .populate('folowers')
-        // .exec((err, user) => {
-        //     if (!User.isUser(req, res, err, user, next)) {
-        //         return;
-        //     }
         User.getByReq(req, res, next, (q)=>{
             q.populate('folowers');
         }).then((user) => {
-            console.log('user', user);
             var folowers = user.folowers.map(folower => folower._id);
             folowers.push(user._id);
 
@@ -159,7 +174,7 @@ function getTweets(req, res, next) {
                     } else {
                         parseTweet(tweets, next, (o) => {
                             res.status(200).json(o);
-                        });
+                        }, user);
                     }
                 });
             } else {
@@ -177,7 +192,7 @@ function getTweets(req, res, next) {
                     } else {
                         parseTweet(tweets, next, (o) => {
                             res.status(200).json(o);
-                        });
+                        }, user);
                     }
                 });
             }
@@ -191,16 +206,35 @@ function getTweet(req, res, next) {
     if (!mongoose.Types.ObjectId.isValid(tweetId)) {
         return res.status(404).json({status: 'Tweet not found'});
     }
+    User.findOne({
+        $and: [
+                {socialNetworkId: req.user.socialNetworkId},
+                {provider: req.user.provider}
+        ]
+    })
+        .exec((err, user) => {
+            Tweet.findOne({
+                $and: [
+                    {_id: tweetId},
+                    {'extras.commentedTweetId': {$exists: false}}
+                ]
+            })
+                .populate('extras.parentTweetId extras.comments')
+                .exec((err, tweet) => {
+                    if (err) {
+                        return next(err);
+                    }
 
-    Tweet.findOne({_id: tweetId})
-    .populate('extras.parentTweetId extras.comments')
-    .exec((err, tweet) => {
-        if (err) {
-            return next(err);
-        } else {
-            res.status(200).json({status: 'OK', tweet});
-        }
-    });
+                    if (!tweet) {
+                        return res.status(404).json({status: 'Tweet not found'});
+                    }
+
+                    parseTweet(tweet, next, (o) => {
+                        res.status(200).json(o);
+                    }, user);
+
+                });
+        });
 }
 
 function likeTweet(req, res, next) {
@@ -220,39 +254,48 @@ function likeTweet(req, res, next) {
         }
 
         Tweet.findById(likeTweetId)
-                    .exec((err, tweet) => {
+            .exec((err, tweet) => {
+                if (err) {
+                    return next(err);
+                }
+
+                if (!tweet) {
+                    return res.status(404).json({status: 'Tweet not found'});
+                }
+
+                var index = tweet.extras.likes.indexOf(user._id);
+
+                if (req.method === 'POST' && (index === -1)) {
+                    tweet.extras.likes.push(user._id);
+
+                    tweet.save(function (err) {
                         if (err) {
                             return next(err);
                         }
 
-                        if (!tweet) {
-                            return res.status(404).json({status: 'Tweet not found'});
-                        }
+                        parseTweet(tweet, next, (o) => {
+                            res.status(200).json(o);
+                        }, user);
 
-                        var index = tweet.extras.likes.indexOf(user._id);
-
-                        if (req.query.like && (index === -1)) {
-                            tweet.extras.likes.push(user._id);
-                            tweet.save(function (err) {
-                                if (err) {
-                                    return next(err);
-                                }
-
-                                return res.status(200).json({like: true, likes: tweet.extras.likes.length});
-                            });
-                        } else if (!(index === -1)) {
-                            tweet.extras.likes.splice(index, 1);
-                            tweet.save(function (err) {
-                                if (err) {
-                                    return next(err);
-                                }
-
-                                return res.status(200).json({like: false, likes: tweet.extras.likes.length});
-                            });
-                        }
-
-                        //res.status(200).json({like: false, likes: tweet.extras.likes.length});
                     });
+                } else if (req.method === 'DELETE' && !(index === -1)) {
+                    tweet.extras.likes.splice(index, 1);
+                    tweet.save(function (err) {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        parseTweet(tweet, next, (o) => {
+                            res.status(200).json(o);
+                        }, user);
+                    });
+                } else {
+                    parseTweet(tweet, next, (o) => {
+                        res.status(200).json(o);
+                    }, user);
+                }
+
+            });
     });
 }
 
@@ -273,40 +316,54 @@ function deleteTweet(req, res, next) {
         }
 
         Tweet.findByIdAndRemove(deleteTweetId)
-                    .where('author', user._id)
-                    .exec((err, tweet) => {
-                        if (err) {
-                            return next(err);
-                        }
-
-                        if (!tweet) {
-                            return res.status(404).json({status: 'Tweet not found'});
-                        }
-
-                        res.status(200).json(tweet);
-                    });
-    });
-}
-
-function parseTweet(tweets, next, cb) {
-    var users = {};
-    tweets.forEach(t => {
-        users[t.author] = null;
-    });
-    console.log('users', Object.keys(users));
-
-    User.find({_id: {$in: Object.keys(users)}})
-            .exec((err, authors) => {
+            .where('author', user._id)
+            .exec((err, tweet) => {
                 if (err) {
                     return next(err);
                 }
 
-                authors.forEach(u => {
-                    users[u._id] = user.userToData(u);
-                });
+                if (!tweet) {
+                    return res.status(404).json({status: 'Tweet not found'});
+                }
 
-                cb( {tweets: tweets, users: users} );
+                parseTweet(tweet, next, (o) => {
+                    res.status(200).json(o);
+                }, user);
             });
+    });
+}
+
+function parseTweet(tweets, next, cb, user) {
+    var users = {};
+    if (!(tweets instanceof Array)) {
+        tweets = [tweets];
+    }
+
+    tweets = tweets.map(x => {
+        var tweet = x.toJSON();
+        users[tweet.author] = null;
+
+        var isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
+        var isRetweeted = tweet.extras.retweets.some(x => x.toString() === user._id.toString());
+
+        isLiked ? (tweet.like = true) : (tweet.like = false);
+        isRetweeted ? (tweet.retweet = true) : (tweet.retweet = false);
+
+        return tweet;
+    });
+
+    User.find({_id: {$in: Object.keys(users)}})
+        .exec((err, authors) => {
+            if (err) {
+                return next(err);
+            }
+
+            authors.forEach(u => {
+                users[u._id] = userFilter.userToData(u);
+            });
+
+            cb( {tweets: tweets, users: users} );
+        });
 }
 
 module.exports = {
