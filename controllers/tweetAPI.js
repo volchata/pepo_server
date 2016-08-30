@@ -346,16 +346,8 @@ function parseTweet(tweets, next, cb, user) {
         var isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
         var isRetweeted = tweet.extras.retweets.some(x => x.toString() === user._id.toString());
 
-        if (isLiked) {
-            tweet.like = true;
-        } else {
-            tweet.like = false;
-        }
-        if (isRetweeted) {
-            tweet.retweet = true;
-        } else {
-            tweet.retweet = false;
-        }
+        tweet.like = isLiked;
+        tweet.retweet = isRetweeted;
 
         return tweet;
     });
