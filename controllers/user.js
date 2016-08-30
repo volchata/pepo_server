@@ -1,15 +1,10 @@
 'use strict';
 
 var User = require('../models/user').User;
-//var controllers = require('../controllers');
 var webPref = require('../conf').get('storage:web');
 var localImg = new RegExp( textEscapeForRE(webPref), 'i');
 var img = require('./images');
 
-/*setImmediate(()=>{
-    img = controllers.images; // циклические зависимости и отложенное подключение модулей
-});
-*/
 function textEscapeForRE(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&').replace(/\n|\r|\n\r|\r\n/g, '');
 }
