@@ -39,6 +39,8 @@ apiRouter
     .get('/user', controllers.user.user)
     .post('/user', img.preAdd('avatar'), controllers.user.postUser)
     // .use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
+    .post('/user', controllers.user.postUser)
+    .get('/users/:search/search', controllers.users.searchUsers)
     .get('/users/:login', controllers.users.getUserByLogin)
     .get('/users/:login/folowers', controllers.limitData, controllers.users.getUserFolowers)
     .get('/user/feed', controllers.tweet.getTweets)

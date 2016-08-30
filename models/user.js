@@ -2,6 +2,10 @@
 
 var mongoose = require('../libs/mongoose-connect');
 mongoose.Promise = global.Promise;
+
+var REscape = function (s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
 var Schema = mongoose.Schema;
 var User;
 
@@ -42,6 +46,12 @@ schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
 schema.statics.byDisplayname = function (displayName) {
     return this.findOne({
         $and: [{displayName: displayName}, {notRegistered: false}]
+    });
+};
+schema.statics.search = function (displayName) {
+
+    return this.find({
+        $and: [{displayName: new RegExp(REscape(displayName))}, {notRegistered: false}]
     });
 };
 
