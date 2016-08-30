@@ -93,7 +93,7 @@ function postUser(req, res) {
         data.notRegistered = false;
         req.user.save(function (err) {
             if (req.file) {
-                req.file.dbo.commit();
+                img.commitFile(req.file);
             }
             if (err) {
                 if ( err.code === 11000 ) {
@@ -155,7 +155,16 @@ function followUser(req, res, next) {
     } );
 }
 
+// eslint-disable-next-line no-unused-vars
+function uploadImage(req, res, next) {
+    if (req.file) {
+        res.status(200).json({status: 'OK', url: req.file.url});
+    }
+    res.status(400).json({status: 'File not found'});
+}
+
 module.exports = {
+    uploadImage,
     user,
     postUser,
     userToData,

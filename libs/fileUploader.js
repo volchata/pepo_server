@@ -34,6 +34,7 @@ function makeUploader(handler){
 	var storage = multer.diskStorage({
 	  destination: function (req, file, cb) {
 	  	var r = req.fileDestinaion = genFPath(req, file);
+	  	file.owner = req.user;
 	  	mkdirp(r.path, (err) => {
 	  		if (err) return cb(err);
 	  		if (handler instanceof Function){
