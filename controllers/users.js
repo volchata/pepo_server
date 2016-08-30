@@ -55,7 +55,7 @@ function getUserChildCollection(child, mapBy) {
             } else {
                 if (typeof user[child][0] !== 'undefined') {
                     var len = user[child].length;
-                    var ids = user[child].slice(offset, offset + limit + 1);
+                    var ids = user[child].slice(offset, offset + limit );
                     User.find().where('_id').in(ids).select(foreignUserFields).exec(function (err, users) {
                         if (err) {
                             next(err);
@@ -76,8 +76,8 @@ function getUserChildCollection(child, mapBy) {
             }});
     };
 }
-var getUserFolowers = getUserChildCollection('folowers', foreignUserToData);
-//var getUserFolowed=getUserChildCollection('followed',getUserByLogin);
+var getUserFollowers = getUserChildCollection('followers', foreignUserToData);
+var getUserFollows = getUserChildCollection('follows', foreignUserToData);
 
 function searchUsers(req, res, next) {
     var search = req.params.search.trim();
@@ -96,6 +96,7 @@ function searchUsers(req, res, next) {
 module.exports = {
     foreignUserToData,
     getUserByLogin,
-    getUserFolowers,
+    getUserFollowers,
+    getUserFollows,
     searchUsers
 };

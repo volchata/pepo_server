@@ -114,57 +114,57 @@ describe('User controller unit test', function () {
         });
 
     });
-    describe('user folowers', function () {
-        var folowers = [];
-        it('get folowers of unexistedUser', function (done) {
+    describe('user followers', function () {
+        var followers = [];
+        it('get followers of unexistedUser', function (done) {
             var login = 'ThisGameHasNoName' + (new Date());
             var request = createRequest({
                 method: 'GET',
-                url: '/api/user/' + login + '/folower',
+                url: '/api/user/' + login + '/follower',
                 params: {login}
             }, user1);
             var response = createResponse();
-            ctrUsers.getUserFolowers(request, response);
+            ctrUsers.getUserFollowers(request, response);
             response.on('end', function () {
                 assert.equal(response.statusCode, 404);
                 done();
             });
         });
-        it('user1 has no folowers. get folowers', function (done) {
+        it('user1 has no followers. get followers', function (done) {
             var request = createRequest({
                 method: 'GET',
-                url: '/api/user/' + Json1.displayName + '/folower',
+                url: '/api/user/' + Json1.displayName + '/follower',
                 params: {login: Json1.displayName}
             }, user1);
             var response = createResponse();
-            ctrUsers.getUserFolowers(request, response);
+            ctrUsers.getUserFollowers(request, response);
             response.on('end', function () {
                 assert.equal(response.statusCode, 204);
                 done();
             });
         });
 
-        it('user1 has 300 folowers. get folowers', function (done) {
+        it('user1 has 300 followers. get followers', function (done) {
             var JsonI;
             for (var i = 0; i < 300; i++) {
                 JsonI = Object.assign({}, Json1);
                 JsonI.notRegistered = false;
                 JsonI.displayName = 'follower_' + i;
-                Json1.socialNetworkId = 1000 + i;
-                folowers[i] = new User(JsonI);
-                folowers[i].save();
+                JsonI.socialNetworkId = 1000 + i;
+                followers[i] = new User(JsonI);
+                followers[i].save();
 
             }
-            user1.folowers = folowers;
+            user1.followers = followers;
             user1.save(function (err, user1) {
 
                 var request = createRequest({
                     method: 'GET',
-                    url: '/api/user/' + Json1.displayName + '/folower',
+                    url: '/api/user/' + Json1.displayName + '/follower',
                     params: {login: Json1.displayName}
                 }, user1);
                 var response = createResponse();
-                ctrUsers.getUserFolowers(request, response);
+                ctrUsers.getUserFollowers(request, response);
                 response.on('end', function () {
                     assert.equal(response.statusCode, 200);
                     var json = JSON.parse(response._getData());
@@ -193,7 +193,7 @@ describe('User controller unit test', function () {
             }
             var request = createRequest({
                 method: 'GET',
-                url: '/api/users/search/folow',
+                url: '/api/users/search/fol',
                 params: {search: 'fol'}
             }, user1);
             var response = createResponse();
@@ -207,7 +207,90 @@ describe('User controller unit test', function () {
             });
 
         });
+
+        it('search unexisted user', function (done) {
+            var login = '___NO' + (new Date());
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/users/search/' + login,
+                params: {search: login}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.searchUsers(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.length, 0);
+                done();
+            });
+
+        });
     });
+    describe('user follows', function () {
+        var follows = [];
+        it('get follows of unexistedUser', function (done) {
+            var login = 'ThisGameHasNoName' + (new Date());
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/user/' + login + '/follows',
+                params: {login}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.getUserFollows(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 404);
+                done();
+            });
+        });
+        it('user1 has no follows. get follows', function (done) {
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/user/' + Json1.displayName + '/follows',
+                params: {login: Json1.displayName}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.getUserFollows(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 204);
+                done();
+            });
+        });
+
+        it('user1 has 300 follows. get follows', function (done) {
+            var JsonI;
+            for (var i = 0; i < 300; i++) {
+                JsonI = Object.assign({}, Json1);
+                JsonI.isRegistered = true;
+                JsonI.displayName = 'follower_' + 2000 + i;
+                JsonI.socialNetworkId = 2000 + i;
+                follows[i] = new User(JsonI);
+                follows[i].save();
+
+            }
+            user1.follows = follows;
+            user1.save(function (err, user1) {
+
+                var request = createRequest({
+                    method: 'GET',
+                    url: '/api/user/' + Json1.displayName + '/follows',
+                    params: {login: Json1.displayName}
+                }, user1);
+                var response = createResponse();
+                ctrUsers.getUserFollows(request, response);
+                response.on('end', function () {
+                    assert.equal(response.statusCode, 200);
+                    var json = JSON.parse(response._getData());
+                    assert.equal(json.limit, 50);
+                    assert.equal(json.offset, 0);
+                    assert.equal(json.data.length, 50);
+                    assert.equal(json.total, 300);
+                    done();
+                });
+            });
+
+        });
+    });
+
     after(function (done) {
         clear();
         done();
