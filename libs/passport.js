@@ -33,8 +33,8 @@ function authenticate(accessToken, refreshToken, profile, done) {
 
 var callbackUrlPrefix = 'http://'+config.get('server:host');
 (function(){
-    var port = config.get('server:portCallback');
-    if ( (port) && (port.length) && (port != '80') ) {
+    var port = +(config.get('server:portCallback'));
+    if ( (typeof port === 'number') && (port != 80) ) {
         callbackUrlPrefix += ':' + port;
     }
 })()
