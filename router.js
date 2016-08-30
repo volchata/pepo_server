@@ -22,6 +22,12 @@ commonRouter        // роутер для обычных путей аутен�
     .use(controllers.auth.ensureAuthenticated)  // точка проверки аутентификации
     .get('/signup', rproxy)
     .get('/signup/', rproxy)
+    .get('/users-search', rproxy)
+    .get('/users-search/', rproxy)
+    .get('/compose', rproxy)
+    .get('/compose/', rproxy)
+    .get('/profile', rproxy)
+    .get('/profile/', rproxy)
     .get('/logout', controllers.auth.logout)
     .use(controllers.auth.ensureRegistered)     // точка проверки регистрации
     .get('/feed/', rproxy)
