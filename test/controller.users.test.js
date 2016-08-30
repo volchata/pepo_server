@@ -207,6 +207,24 @@ describe('User controller unit test', function () {
             });
 
         });
+
+        it('search unexisted user', function (done) {
+            var login = '___NO' + (new Date());
+            var request = createRequest({
+                method: 'GET',
+                url: '/api/users/search/' + login,
+                params: {search: login}
+            }, user1);
+            var response = createResponse();
+            ctrUsers.searchUsers(request, response);
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.length, 0);
+                done();
+            });
+
+        });
     });
     describe('user follows', function () {
         var follows = [];
