@@ -31,7 +31,14 @@ function authenticate(accessToken, refreshToken, profile, done) {
 }
  
 
-var callbackUrlPrefix = 'http://'+config.get('server:host') + ':' + config.get('server:port')
+var callbackUrlPrefix = 'http://'+config.get('server:host');
+(function(){
+    var port = config.get('server:portCallback');
+    if ( (port) && (port.length) && (port != '80') ) {
+        callbackUrlPrefix += ':' + port;
+    }
+})()
+
 
 passport.use(new FacebookStrategy({
         clientID: config.get("auth:fb:app_id"),

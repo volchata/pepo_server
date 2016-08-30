@@ -5,15 +5,33 @@ var uploader = require('../libs/fileUploader').create( addFile );
 const fs = require('fs');
 var conf = require('../conf');
 
+function logger(err) {
+    if (err) {
+        console.error(err);
+    }
+}
+
 function addFile(file, cb) {
     var f = new File( {path: file.path, url: file.url} );
-    // console.log('Here im', file);
-    f.save((err)=>{
-        file.dbo = f;
-        if (cb instanceof Function) {
-            cb(err);
+    // console.log('file', file);
+    if (file.owner.fileBuffer && file.owner.fileBuffer.length) {
+        removeFile(file.owner.fileBuffer, logger);
+    }
+    file.owner.fileBuffer = file.url;
+    file.owner.save( (err1) =>{
+        logger(err1);
+        if ((err1) && (cb instanceof Function)) {
+            return cb(err1);
         }
-    });
+        f.save((err)=>{
+            logger(err);
+            file.dbo = f;
+            if (cb instanceof Function) {
+                cb(err);
+            }
+        });
+    } );
+
 }
 
 function doRemoveFile(path, cb ) {
@@ -24,17 +42,47 @@ function doRemoveFile(path, cb ) {
 
 function removeFile(url, cb) {
 
-    File.setToRemoveByURL(url, (err, file)=>{
-        if (err) {
-            return console.error(err);
+    File.setToRemoveByURL(url, (err1, file)=>{
+        if ((err1)) {
+            if ( (cb instanceof Function)) {
+                return cb(err1);
+            } else {
+                return console.error(err1);
+            }
         }
         doRemoveFile(file.path, (err)=>{
-            if (err) {
-                return console.error(err);
+            if ((err)) {
+                if ( (cb instanceof Function)) {
+                    return cb(err);
+                } else {
+                    return console.error(err);
+                }
             }
             file.remove(cb);
         });
     });
+}
+
+function commitFile(file, cb) { // Товарищ! Помни! Отсутствие транзакций -- убивает! :'-(
+    file.owner.freeBuffer( err1 => {
+        if ((err1)) {
+            if ( (cb instanceof Function)) { // какая то фигня с колбеками. Промисы forever!
+                return cb(err1);
+            } else {
+                return console.error(err1);
+            }
+        }
+        file.dbo.commit( err => {
+            if ((err)) {
+                if ( (cb instanceof Function)) {
+                    return cb(err);
+                } else {
+                    return console.error(err);
+                }
+            }
+        });
+    });
+
 }
 
 function preAdd(fname) {
@@ -44,6 +92,9 @@ function preAdd(fname) {
 function removeListOfFiles(files) {
     if (!files) {
         return;
+    }
+    if (!(files instanceof Array)) {
+        files = [files];
     }
     files.forEach( f => {
         doRemoveFile(f.path, (err1)=>{
@@ -98,6 +149,7 @@ function garbageCollector() {
 })();
 
 module.exports = {
+    commitFile,
     preAdd,
     removeFile
 };

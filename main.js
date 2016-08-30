@@ -9,9 +9,11 @@ var session = require('express-session');
 var router = require('./router');
 var passport = require('passport');
 var config = require('./conf');
+var mongoose = require('./libs/mongoose-connect');
+var MongoStore = require('connect-mongo')(session);
 
 // в среде тестирования это не выводим
-if (/test/.test(process.env.NODE_ENV)) {
+if (!(/test/.test(process.env.NODE_ENV))) {
     app.use(morgan('combined'));
 }
 
@@ -24,13 +26,13 @@ app
         resave: false,
         saveUninitialized: false,
         cookie: {maxAge: 7 * 24 * 60 * 60 * 1000}, //, secure: true }, // one week
-        unset: 'destroy'
-        // store: new MongoStore({ dbPromise: db.dbPromise,
-        //         autoRemove: 'native',
-        //         ttl: 14 * 24 * 60 * 60,
-        //         touchAfter: 10 * 60,
-        //         stringify: false
-        // })
+        unset: 'destroy',
+        store: new MongoStore({mongooseConnection: mongoose.connection,
+                autoRemove: 'native',
+                ttl: 14 * 24 * 60 * 60,
+                touchAfter: 10 * 60,
+                stringify: false
+        })
     }))
     .use(passport.initialize())
     .use(passport.session());
