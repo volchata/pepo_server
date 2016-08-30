@@ -86,7 +86,7 @@ function searchUsers(req, res, next) {
             if (err) {
                 next(err);
             } else if ((!users) || users.length === 0) {
-                res.status(404).send({status: 'Not found'});
+                res.json([]);
             } else {
                 res.json(users.map(foreignUserToData));
             }}
