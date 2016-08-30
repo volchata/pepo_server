@@ -1,14 +1,9 @@
 'use strict';
 
 var User = require('../models/user').User;
-var controllers = require('../controllers');
 var webPref = require('../conf').get('storage:web');
 var localImg = new RegExp( textEscapeForRE(webPref), 'i');
-var img;
-
-setImmediate(()=>{
-    img = controllers.images; // циклические зависимости и отложенное подключение модулей
-});
+var img = require('./images');
 
 function textEscapeForRE(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&').replace(/\n|\r|\n\r|\r\n/g, '');
@@ -47,6 +42,7 @@ function userToData(user) {
  * @param res
  */
 function user(req, res) {
+
     res.json(userToData(req.user));
 }
 
