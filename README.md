@@ -38,10 +38,12 @@
 	    "content": "tweet text ok ok ok ok. hello",		// содержание
 	    "timestamp": "2016-12-12 10:45:33",			// дата создания
 		"like": // true - пользователь поставил like
+		"retweet": // true - пользователь ретвитнул твит
 	    "extras": {
 		        "parent": { twitObj },		// если это ретвит, то это его "родительский" твит
 		        "source": { twitObj },		// если это коментарий, то его "исходный" твит
 				"likes": [{ userObj }],
+				"retweets": [{ userObj }],
 		        "image": "http://cool-image.ru/1.jpg",	// если в твите картинка, то ссылка на неё
 		        "url": null,			// ???
 		        "geo": null,			// гео-метка
@@ -240,9 +242,25 @@
 
 >POST /api/tweet/:id/like
 
-- like твит, параметры: 
-	- like=true -- поставить like. JSON {like: true, likes: количество лайков}
-	- без параметров -- убрать like(если был лайкнут этим пользователем). JSON {like: false, likes: количество лайков}
+- поставить лайк
+
+- 200
+- 403
+- 404
+
+
+>DELETE /api/tweet/:id/like
+
+- убрать свой лайк
+
+- 200
+- 403
+- 404
+
+
+>DELETE /tweet/:id
+
+- удалить свой твит
 
 - 200
 - 403

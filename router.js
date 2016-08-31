@@ -34,7 +34,6 @@ apiRouter
     .post('/user', img.preAdd('avatar'), controllers.user.postUser)
     // .use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
     .get('/users/:login', controllers.users.getUserByLogin)
-    .get('/users/:login/feed', controllers.tweet.getTweets)
     .get('/users/:login/folowers', controllers.limitData, controllers.users.getUserFolowers)
     .get('/user/feed', controllers.tweet.getTweets)
     .get('/tweet/:id', controllers.tweet.getTweet)
@@ -43,9 +42,9 @@ apiRouter
     .post('/tweet/:id/retweet', controllers.tweet.reTweet)
     .post('/tweet/:id', img.preAdd('image'), controllers.tweet.commentTweet)
     .post('/tweet/:id/like', controllers.tweet.likeTweet)
-    .delete('/tweet/:id', controllers.tweet.deleteTweet)
     .delete('/users/:login/follower', controllers.user.followUser)
-;
+    .delete('/tweet/:id/like', controllers.tweet.likeTweet)
+    .delete('/tweet/:id', controllers.tweet.deleteTweet);
 
 module.exports = function (app) {
     app

@@ -15,6 +15,7 @@ var schema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Tweet'
         },
+        retweets: [{type: Schema.Types.ObjectId, ref: 'User'}],
         commentedTweetId: {
             type: Schema.Types.ObjectId,
             ref: 'Tweet'
