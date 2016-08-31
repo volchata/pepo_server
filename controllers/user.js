@@ -138,21 +138,29 @@ function followUser(req, res, next) {
             res.status(404).json({status: 'User not found'});
         } else {
             //POST ONLY
-            var p1 = User.findByIdAndUpdate({_id: fuser._id}, {
+            var queries = (req.method === 'POST') ? [{
                 $addToSet: {
-                    followers: req.user
+                    followers: req.user._id
                 }
             }, {
-                new: true
+                $addToSet: {
+                    follows: fuser._id
+                }
+            }] : [{
+                $pull: {
+                    followers: req.user._id
+                }
+            }, {
+                $pull: {
+                    follows: fuser._id
+                }
+            }];
 
+            var p1 = User.findByIdAndUpdate({_id: fuser._id}, queries[0], {
+                new: true
             }).exec();
-            var p2 = User.findByIdAndUpdate({_id: req.user._id}, {
-                $addToSet: {
-                    follows: fuser
-                }
-            }, {
+            var p2 = User.findByIdAndUpdate({_id: req.user._id}, queries[1], {
                 new: true
-
             }).exec();
 
             when.all([p1, p2]).then(function (stats) {

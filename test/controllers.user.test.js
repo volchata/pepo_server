@@ -245,6 +245,77 @@ describe('User controller unit test', function () {
             });
 
         });
+        it('post user to followers again', function (done) {//done required for assinc asserts
+
+            var data = {
+                method: 'POST',
+                //url: '/api/user',
+                params: {login: user2.displayName}
+            };
+            var request = createRequest(data, user1);
+            var response = createResponse();
+            ctr.followUser(request, response);
+
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.follows, 1);
+                User.findOne({_id: user2._id}).exec(function (err, user) {
+                    assert.equal(!err, true);
+                    assert.lengthOf(user.followers, 1);
+                });
+                done();
+            });
+
+        });
+
+        it('delete user from followers', function (done) {//done required for assinc asserts
+
+            var data = {
+                method: 'DELETE',
+                //url: '/api/user',
+                params: {login: user2.displayName}
+            };
+            var request = createRequest(data, user1);
+            var response = createResponse();
+            ctr.followUser(request, response);
+
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.follows, 0);
+                User.findOne({_id: user2._id}).exec(function (err, user) {
+                    assert.equal(!err, true);
+                    assert.lengthOf(user.followers, 0);
+                });
+                done();
+            });
+
+        });
+        it('delete user from followers again', function (done) {//done required for assinc asserts
+
+            var data = {
+                method: 'DELETE',
+                //url: '/api/user',
+                params: {login: user2.displayName}
+            };
+            var request = createRequest(data, user1);
+            var response = createResponse();
+            ctr.followUser(request, response);
+
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.follows, 0);
+                User.findOne({_id: user2._id}).exec(function (err, user) {
+                    assert.equal(!err, true);
+                    assert.lengthOf(user.followers, 0);
+                });
+                done();
+            });
+
+        });
+
     });
     after(function (done) {
         clear();
