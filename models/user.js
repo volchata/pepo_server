@@ -38,23 +38,11 @@ var schema = new Schema({
     },
     followers: [{type: Schema.Types.ObjectId, ref: 'User'}],
     follows: [{type: Schema.Types.ObjectId, ref: 'User'}],
-    fileBuffer: {
-        type: String
-    },
     friends: [{type: Schema.Types.ObjectId, ref: 'User'}]
 
 });
 
 schema.index({provider: 1, socialNetworkId: 1}, {unique: true});
-
-schema.methods.freeBuffer = function (cb) {
-    this.fileBuffer = null;
-    this.save((err) => {
-        if (cb instanceof Function) {
-            cb(err, this);
-        }
-    });
-};
 
 schema.statics.byDisplayname = function (displayName) {
     return this.findOne({
