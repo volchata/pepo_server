@@ -73,6 +73,8 @@ describe('User controller unit test', function () {
         var json = JSON.parse(response._getData());
         assert.equal(response.statusCode, 200);
         assert.equal(json.notRegistered, true);
+        assert.equal(json.followers, 0);
+        assert.equal(json.follows, 0);
         assert.equal(json.avatar, 'http://placehold.it/100x100');
 
     });
@@ -213,6 +215,30 @@ describe('User controller unit test', function () {
 
     });
     it('get posted description', checkSaved);
+    describe('add user to followers', function () {
+        //'/users/:login/follower'
+        it('post user to followers', function (done) {//done required for assinc asserts
+            var data = {
+                method: 'POST',
+                url: '/api/user',
+                params: {login: user2.displayName}
+            };
+            var request = createRequest(data, user1);
+            var response = createResponse();
+            ctr.followUser(request, response);
+
+            response.on('end', function () {
+                //assert.equal(response._getRedirectUrl(), '/api/user');
+                //assert.equal(response.statusCode, 302);
+                assert.equal(response.statusCode, 200);
+                //var json = JSON.parse(response._getData());
+                assert.equals(user1.followers.length, 1);
+                assert.equals(user2.follows.length, 1);
+                done();
+            });
+
+        });
+    });
     after(function (done) {
         clear();
         done();
