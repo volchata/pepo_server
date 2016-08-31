@@ -3,7 +3,8 @@
 var httpMocks = require('node-mocks-http');
 var ctr = require('../controllers/user');
 var User = require('../models/user').User;
-var assert = require('assert');
+//var assert = require('assert');
+var assert = require('chai').assert;
 var when = require('when');
 
 function clear() {
@@ -72,7 +73,8 @@ describe('User controller unit test', function () {
         ctr.user(request, response);
         var json = JSON.parse(response._getData());
         assert.equal(response.statusCode, 200);
-        assert.equal(json.notRegistered, true);
+        assert(json.notRegistered);
+        //assert.equal(json.notRegistered, true);
         assert.equal(json.followers, 0);
         assert.equal(json.follows, 0);
         assert.equal(json.avatar, 'http://placehold.it/100x100');
@@ -236,7 +238,7 @@ describe('User controller unit test', function () {
                     assert.equal(json.follows, 1);
                     User.findOne({_id: user2._id}).exec(function (err, user) {
                         assert.equal(!err, true);
-                        assert.equal(user.followers.length, 1);
+                        assert.lengthOf(user.followers, 1);
                     });
                     done();
                 });
