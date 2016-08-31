@@ -218,23 +218,28 @@ describe('User controller unit test', function () {
     describe('add user to followers', function () {
         //'/users/:login/follower'
         it('post user to followers', function (done) {//done required for assinc asserts
+            user2.displayName = '__follows' + (new Date());
+
             var data = {
                 method: 'POST',
-                url: '/api/user',
+                //url: '/api/user',
                 params: {login: user2.displayName}
             };
-            var request = createRequest(data, user1);
-            var response = createResponse();
-            ctr.followUser(request, response);
+            user2.save(function () {
+                var request = createRequest(data, user1);
+                var response = createResponse();
+                ctr.followUser(request, response);
 
-            response.on('end', function () {
-                //assert.equal(response._getRedirectUrl(), '/api/user');
-                //assert.equal(response.statusCode, 302);
-                assert.equal(response.statusCode, 200);
-                //var json = JSON.parse(response._getData());
-                assert.equals(user1.followers.length, 1);
-                assert.equals(user2.follows.length, 1);
-                done();
+                response.on('end', function () {
+                    assert.equal(response.statusCode, 200);
+                    var json = JSON.parse(response._getData());
+                    assert.equal(json.follows, 1);
+                    User.findOne({_id: user2._id}).exec(function (err, user) {
+                        assert.equal(!err, true);
+                        assert.equal(user.followers.length, 1);
+                    });
+                    done();
+                });
             });
 
         });

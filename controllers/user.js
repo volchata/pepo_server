@@ -4,6 +4,7 @@ var User = require('../models/user').User;
 var webPref = require('../conf').get('storage:web');
 var localImg = new RegExp( textEscapeForRE(webPref), 'i');
 var img = require('./images');
+var when = require('when');
 
 function textEscapeForRE(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&').replace(/\n|\r|\n\r|\r\n/g, '');
@@ -114,13 +115,55 @@ function postUser(req, res) {
 
 }
 
+/**
+ * @api {post} /users/:login/follower Follow user
+ * @apiDescription Current user start follow user whith displayName :login
+ * @apiGroup User
+ * @apiName FollowUser
+ * @apiVersion 0.1.0
+ * @apiError (Errors) 403 Access denied
+ * @apiError (Errors) 404 User not found
+ * @apiError (Errors) 500 Error
+ * @param req
+ * @param res
+ */
 function followUser(req, res, next) {
 
-    var flogin = req.param.login;
+    var flogin = req.params.login;
+    //var sid = req.user._id;
+    User.byDisplayname(flogin).exec(function (err, fuser) {
+        if (err) {
+            next(err);
+        } else if (!fuser) {
+            res.status(404).json({status: 'User not found'});
+        } else {
+            //POST ONLY
+            var p1 = User.findByIdAndUpdate({_id: fuser._id}, {
+                $addToSet: {
+                    followers: req.user
+                }
+            }, {
+                new: true
 
-    User.getByLogin( flogin, res, next).then( (fuser) => {
+            }).exec();
+            var p2 = User.findByIdAndUpdate({_id: req.user._id}, {
+                $addToSet: {
+                    follows: fuser
+                }
+            }, {
+                new: true
 
-        var sid = req.user._id;
+            }).exec();
+
+            when.all([p1, p2]).then(function (stats) {
+                return res.json(userToData(stats[1]));
+            }).catch(function (err) {
+                next(err);
+            });
+        }
+    });
+    /*.then( (fuser) => {
+
         var func = {followers: req.user._id};
         // console.log('Sid', sid, fuser.followers);
 
@@ -154,7 +197,7 @@ function followUser(req, res, next) {
             }
         );
 
-    } );
+    } );*/
 }
 
 // eslint-disable-next-line no-unused-vars
