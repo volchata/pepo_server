@@ -6,7 +6,8 @@ function restartAuth(res) {
     return res.redirect('/auth/');
 }
 
-function startApp(res) {
+// eslint-disable-next-line no-unused-vars
+function startApp(req, res) {
     return res.redirect('/feed');
 }
 
@@ -75,6 +76,7 @@ function wrongAPIPoint(req, res, next) {
 
 module.exports = {
     logout,
+    startApp,
     wrongAPIPoint,
     ensureAuthenticated,
     ensureAuthenticatedAPI,
