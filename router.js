@@ -10,28 +10,21 @@ var config = require('./conf');
 var img = controllers.images;
 
 commonRouter        // роутер для обычных путей аутентификации
-    .use('/doc/api', express.static('apidoc'))
     .get('/auth/', rproxy)
     .get('/auth/vk', controllers.auth.authVK)
     .get('/auth/vk/callback', controllers.auth.authVK)
     .get('/auth/fb', controllers.auth.authFB)
     .get('/auth/fb/callback', controllers.auth.authFB)
+    .use('/doc/api', express.static('apidoc'))
     .use(config.get('storage:web'), express.static( config.get('storage:dir') ))
     .get('/favicon.ico', rproxy)
     .get(/\.js$|\.css$/, rproxy)
     .use(controllers.auth.ensureAuthenticated)  // точка проверки аутентификации
     .get('/signup', rproxy)
     .get('/signup/', rproxy)
-    .get('/users-search', rproxy)
-    .get('/users-search/', rproxy)
-    .get('/compose', rproxy)
-    .get('/compose/', rproxy)
-    .get('/profile', rproxy)
-    .get('/profile/', rproxy)
     .get('/logout', controllers.auth.logout)
     .use(controllers.auth.ensureRegistered)     // точка проверки регистрации
-    .get('/feed/', rproxy)
-    .get('/feed', rproxy);
+    .get('*', rproxy);
 
 apiRouter
     .use(controllers.auth.ensureAuthenticatedAPI)               // обязательная проверка аутентификации пользователя
@@ -54,7 +47,8 @@ apiRouter
     .post('/tweet/:id/like', controllers.tweet.likeTweet)
     .delete('/users/:login/follower', controllers.user.followUser)
     .delete('/tweet/:id/like', controllers.tweet.likeTweet)
-    .delete('/tweet/:id', controllers.tweet.deleteTweet);
+    .delete('/tweet/:id', controllers.tweet.deleteTweet)
+    .use(controllers.auth.wrongAPIPoint);
 
 module.exports = function (app) {
     app

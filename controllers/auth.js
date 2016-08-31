@@ -68,8 +68,14 @@ function authenticatorFabric(authStrategy) {
     };
 }
 
+// eslint-disable-next-line no-unused-vars
+function wrongAPIPoint(req, res, next) {
+    return res.status(404).json({status: 'WrongAPIPoint'});
+}
+
 module.exports = {
     logout,
+    wrongAPIPoint,
     ensureAuthenticated,
     ensureAuthenticatedAPI,
     ensureRegistered,
