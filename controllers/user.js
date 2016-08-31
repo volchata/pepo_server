@@ -114,6 +114,22 @@ function postUser(req, res) {
     }
 
 }
+/**
+ * @api {delete} /users/:login/follower Stop follow user
+ * @apiDescription Current user stop follow user whith displayName :login
+ * @apiGroup User
+ * @apiName StopFollowUser
+ * @apiVersion 0.1.0
+ * @apiSuccess (200) {String} displayname Displayname of the User.
+ * @apiSuccess (200) {String} firstName Firstname of the User.
+ * @apiSuccess (200) {String} lastName Lastname of the User.
+ * @apiSuccess (200) {String} description Description of the User.
+ * @apiSuccess (200) {String} avatar Avatar of the User.
+ * @apiSuccess (200) {Number} follows Number of person user follows
+ * @apiError (Errors) 403 Access denied
+ * @apiError (Errors) 404 User not found
+ * @apiError (Errors) 500 Error
+ */
 
 /**
  * @api {post} /users/:login/follower Follow user
@@ -121,12 +137,19 @@ function postUser(req, res) {
  * @apiGroup User
  * @apiName FollowUser
  * @apiVersion 0.1.0
+ * @apiSuccess (200) {String} displayname Displayname of the User.
+ * @apiSuccess (200) {String} firstName Firstname of the User.
+ * @apiSuccess (200) {String} lastName Lastname of the User.
+ * @apiSuccess (200) {String} description Description of the User.
+ * @apiSuccess (200) {String} avatar Avatar of the User.
+ * @apiSuccess (200) {Number} follows Number of person user follows
  * @apiError (Errors) 403 Access denied
  * @apiError (Errors) 404 User not found
  * @apiError (Errors) 500 Error
  * @param req
  * @param res
  */
+
 function followUser(req, res, next) {
 
     var flogin = req.params.login;
@@ -170,42 +193,6 @@ function followUser(req, res, next) {
             });
         }
     });
-    /*.then( (fuser) => {
-
-        var func = {followers: req.user._id};
-        // console.log('Sid', sid, fuser.followers);
-
-        if (req.method === 'POST') {
-            if (fuser.followers.indexOf(sid) > -1) {
-                return res.json(userToData(fuser));
-            }
-            func = {$push: func};
-        } else if (req.method === 'DELETE') {
-            if (fuser.followers.indexOf(sid) === -1) {
-                return res.json(userToData(fuser));
-            }
-            func = {$pull: func};
-        }
-
-        User.findOneAndUpdate(
-            {
-                displayName: flogin,
-                notRegistered: false
-            },
-            func,
-            function (err, user) {
-                if (err) {
-                    return next(err);
-                }
-                if (user) {
-                    return res.json(userToData(user));
-                } else {
-                    res.status(404).json({status: 'User not found'});
-                }
-            }
-        );
-
-    } );*/
 }
 
 // eslint-disable-next-line no-unused-vars
