@@ -24,6 +24,7 @@ commonRouter        // роутер для обычных путей аутен�
     .get('/signup/', rproxy)
     .get('/logout', controllers.auth.logout)
     .use(controllers.auth.ensureRegistered)     // точка проверки регистрации
+    .get('/', controllers.auth.startApp)
     .get('*', rproxy);
 
 apiRouter
