@@ -1,9 +1,17 @@
 'use strict';
 
 var File = require('../models/file');
-var uploader = require('../libs/fileUploader').create( addFile );
+var Uploader = require('../libs/fileUploader');
+var uploader = Uploader.create( addFile );
+var mkdirp = require('mkdirp');
 const fs = require('fs');
 var conf = require('../conf');
+var createSnapshot = require('./snapshot');
+
+var snapFormat = conf.get('snapshotsFormat');
+if ((!snapFormat) || (!snapFormat.lenght)) {
+    snapFormat = 'jpg';
+}
 
 function logger(err) {
     if (err) {
@@ -12,26 +20,22 @@ function logger(err) {
 }
 
 function addFile(file, cb) {
-    var f = new File( {path: file.path, url: file.url} );
-    // console.log('file', file);
-    if (file.owner.fileBuffer && file.owner.fileBuffer.length) {
-        removeFile(file.owner.fileBuffer, logger);
+    var fo = {path: file.path, url: file.url, owner: file.owner._id};
+    if (file.target) {
+        fo.target = file.target;
     }
-    file.owner.fileBuffer = file.url;
-    file.owner.save( (err1) =>{
-        logger(err1);
-        if ((err1) && (cb instanceof Function)) {
-            return cb(err1);
-        }
-        f.save((err)=>{
-            logger(err);
-            file.dbo = f;
-            if (cb instanceof Function) {
-                cb(err);
-            }
-        });
-    } );
 
+    var f = new File( fo );
+
+    f.save((err)=>{
+        if (err) {
+            logger(err);
+        }
+        file.dbo = f;
+        if (cb instanceof Function) {
+            cb(err);
+        }
+    });
 }
 
 function doRemoveFile(path, cb ) {
@@ -64,14 +68,17 @@ function removeFile(url, cb) {
 }
 
 function commitFile(file, cb) { // Товарищ! Помни! Отсутствие транзакций -- убивает! :'-(
-    file.owner.freeBuffer( err1 => {
-        if ((err1)) {
-            if ( (cb instanceof Function)) { // какая то фигня с колбеками. Промисы forever!
-                return cb(err1);
-            } else {
-                return console.error(err1);
+    if (typeof file === 'string') {
+        File.getByURL( (err, file) => {
+            if ((!err) && (file)) {
+                return file.commit(cb);
             }
-        }
+            if (!err) {
+                err = 'File not found!';
+            }
+            return cb(err);
+        } );
+    } else {
         file.dbo.commit( err => {
             if ((err)) {
                 if ( (cb instanceof Function)) {
@@ -81,8 +88,7 @@ function commitFile(file, cb) { // Товарищ! Помни! Отсутств�
                 }
             }
         });
-    });
-
+    }
 }
 
 function preAdd(fname) {
@@ -148,7 +154,82 @@ function garbageCollector() {
     setInterval( garbageCollector, dt );
 })();
 
+// eslint-disable-next-line no-unused-vars
+function uploadImage(req, res, next) {
+    if (req.file) {
+        res.status(200).json({status: 'OK', image: req.file.url});
+    }
+    res.status(400).json({status: 'File not found'});
+}
+
+// eslint-disable-next-line no-unused-vars
+function makeSnapshot(req, res, next) {
+    var basename = Date.now() + '.' + snapFormat;
+    console.log('body', req.body);
+    var ret = Uploader.genFilePath(req.user.displayName, basename);
+    ret.target = req.body.url;
+    ret.owner = req.user;
+
+    mkdirp(ret.path, (err) => {
+        if (err) {
+            return console.log('Error:', err);
+        }
+        addFile(ret, (err1)=>{
+            if (err1) {
+                return console.log('Error:', err1);
+            }
+            createSnapshot(req.body.url, ret.fullpath, (err2, title)=>{
+                if (err2) {
+                    return console.log('Error:', err2);
+                }
+                ret.dbo.title = title;
+                ret.dbo.save( (err3)=>{
+                    if (err3) {
+                        console.log('Error3:', err3);
+                    }
+                } );
+            } );
+        });
+
+    });
+
+    res.json({status: 'OK', attachment: ret.url});
+}
+
+function getSnapshot(req, res, next) {
+    var cycles = 10;
+    function reporter() {
+        File.getByURL('/' + req.params.url, function (err, file) {
+            if (err) {
+                return next(err);
+            }
+            if (!file) {
+                return res.status(404).json({status: 'File not found'});
+            }
+            if (file.title) {
+                res.json({
+                    url: file.target,
+                    image: file.url,
+                    title: file.title
+                });
+            } else {
+                if (cycles > 0) {     // костыли костылёзные, но некогда писать на ивентах, но я обещаю, что перепишу
+                    cycles--;
+                    setTimeout(reporter, 1000);
+                } else {
+                    res.json({status: 'UnSuccessful'});
+                }
+            }
+        });
+
+    }
+    reporter();
+}
+
 module.exports = {
+    getSnapshot,
+    uploadImage,
+    makeSnapshot,
     commitFile,
     preAdd,
     removeFile

@@ -14,6 +14,9 @@ var schema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    title: {type: String},
+    target: {type: String},
+    owner: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
     commited: {type: Boolean, default: false},
     toRemove: {type: Boolean, default: false},
     timeStamp: {type: Number, default: Date.now}
@@ -23,6 +26,7 @@ var schema = new mongoose.Schema({
 var File;
 
 schema.index({url: 1});
+schema.index({owner: 1});
 schema.index({toRemove: 1});
 
 schema.methods.rm = function (cb) {
@@ -52,6 +56,17 @@ schema.statics.getRemoving = function (cb) {
     File.findOne({
         toRemove: true
     }).exec(cb);
+};
+
+schema.statics.getNotCommitedUsersFiles = function (userId, cb) {
+    File.findOne({
+        commited: false,
+        owner: userId
+    }).exec(cb);
+};
+
+schema.statics.getByURL = function (url, cb) {
+    File.findOne({url}).exec(cb);
 };
 
 schema.statics.setToRemoveByURL = function (url, cb) {

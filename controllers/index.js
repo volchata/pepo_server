@@ -7,3 +7,4 @@ module.exports.user = require('./user');
 module.exports.auth = require('./auth');
 module.exports.cors = require('./cors');
 module.exports.tweet = require('./tweetAPI');
+module.exports.snapshot = require('./snapshot');

@@ -34,6 +34,7 @@
         "web": "/file",
         "commitTimeout": 300,
         "gcInterval": 1
-    }
+    },
+    "snapshotsFormat": "jpg"
     
 }

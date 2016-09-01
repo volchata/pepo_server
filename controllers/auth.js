@@ -19,7 +19,19 @@ function logout(req, res) {
     res.redirect('/');
 }
 
+var User = require('../models/user').User;
 function ensureAuthenticatedAPI(req, res, next) {
+    if (/woauth/.test(process.env.NODE_ENV)) {
+        return User.findOne({}, function (err, user) {
+            if (err) {
+                console.log('Err', err);return next(err);
+            }
+            req.user = user;
+            console.log('Without auth env');
+            return next();
+        });
+
+    }
     if (!req.isAuthenticated || !req.isAuthenticated()) {
         return res.status(403).json({status: 'Unauthenticated'});
     }

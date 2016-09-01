@@ -9,6 +9,8 @@ var config = require('./conf');
 
 var img = controllers.images;
 
+// var snap = controllers.snapshot;
+
 commonRouter        // роутер для обычных путей аутентификации
     .get('/auth/', rproxy)
     .get('/auth/vk', controllers.auth.authVK)
@@ -42,7 +44,9 @@ apiRouter
     .get('/tweet/:id/comments', controllers.tweet.getComments)
     .get('/tweet/:id', controllers.tweet.getTweet)
     .post('/user/feed', controllers.tweet.setTweet)
-    .post('/user/image', img.preAdd('image'), controllers.user.uploadImage)
+    .post('/user/image', img.preAdd('image'), img.uploadImage)
+    .post('/user/snapshot', img.makeSnapshot)
+    .get('/user/snapshot/:url([\/a-z0-9_.]+)', img.getSnapshot)
     .post('/users/:login/follower', controllers.user.followUser)
     .post('/tweet/:id/retweet', controllers.tweet.reTweet)
     .post('/tweet/:id', controllers.tweet.commentTweet)

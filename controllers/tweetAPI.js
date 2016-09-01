@@ -1,9 +1,51 @@
 'use strict';
 
+var mongoose = require('mongoose');
 var Tweet = require('../models/tweet').Tweet;
 var User = require('../models/user').User;
-var mongoose = require('mongoose');
 var userFilter = require('./user');
+var images = require('./images');
+
+function createTwit(user, base, cb ) {
+    var b = {
+        author: user._id,
+        content: base.content,
+        extras: { }
+    }
+
+    /*eslint-disable no-unexpected-multiline,no-sequences */
+    ['commentedTweetId', 'geo', 'url', 'parentTweetId', 'image'].forEach((item) => {
+        if (base[item]) {
+            b.extras[item] = base[item];
+        }
+    });
+
+    if (base.image) {
+        images.commitFile(base.image, cb);
+    }
+    if (base.attachment) {
+        images.commitFile(base.attachment, (err, att)=>{
+            if ((att) && (!err)) {
+                b.attachment = {
+                    url: att.target,
+                    image: att.url,
+                    title: att.title
+                };
+                cb(null, new Tweet(b));
+            } else {
+                if (!err) {
+                    err = 'Attachment not found';
+                }
+                cb(err);
+            }
+        });
+    } else {
+        setImmediate( () => {
+            cb(null, new Tweet(b));
+        });
+    }
+
+}
 
 function setTweet(req, res, next) {
     User.findOne({
@@ -15,20 +57,21 @@ function setTweet(req, res, next) {
             return;
         }
 
-        var tweet = new Tweet({
-            author: user._id,
-            content: req.body.content
+        createTwit(user, req.body, (err1, tweet) => {
+            if (err1) {
+                return next(err1);
+            }
+            tweet.save(function (err) {
+                if (err) {
+                    return next(err);
+                } else {
+                    parseTweet(tweet, next, (o) => {
+                        res.status(200).json(o);
+                    }, user);
+                }
+            });
         });
 
-        tweet.save(function (err) {
-            if (err) {
-                return next(err);
-            } else {
-                parseTweet(tweet, next, (o) => {
-                    res.status(200).json(o);
-                }, user);
-            }
-        });
     });
 }
 
@@ -62,22 +105,22 @@ function reTweet(req, res, next) {
                     var isRetweet = parentTweet.extras.retweets.some(x => x.toString() === user._id.toString());
 
                     if (!isRetweet) {
-                        var tweet = new Tweet({
-                            author: user._id,
-                            content: req.body.content,
-                            extras: {
-                                parentTweetId: parentTweetId
-                            }
-                        });
+                        req.body.parentTweetId = parentTweetId;
 
-                        tweet.save(function (err) {
-                            if (err) {
-                                return next(err);
-                            } else {
-                                parseTweet(tweet, next, (o) => {
-                                    res.status(200).json(o);
-                                }, user);
+                        createTwit(user, req.body, (err1, tweet) => {
+                            if (err1) {
+                                return next(err1);
                             }
+
+                            tweet.save(function (err) {
+                                if (err) {
+                                    return next(err);
+                                } else {
+                                    parseTweet(tweet, next, (o) => {
+                                        res.status(200).json(o);
+                                    }, user);
+                                }
+                            });
                         });
 
                         parentTweet.extras.retweets.push(user._id);
@@ -119,32 +162,29 @@ function commentTweet(req, res, next) {
                 return res.status(404).json({status: 'Tweet not found'});
             }
 
-            var tweet = new Tweet({
-                author: user._id,
-                content: req.body.content,
-                extras: {
-                    commentedTweetId: commentedTweetId,
-                    image: req.body.image,
-                    url: req.body.url,
-                    geo: req.body.geo
-                }
-            });
+            req.body.commentedTweetId = commentedTweetId;
 
-            tweet.save(function (err) {
-                if (err) {
-                    return next(err);
-                } else {
-                    parseTweet(tweet, next, (o) => {
-                        res.status(200).json(o);
-                    }, user);
+            createTwit(user, req.body, (err1, tweet) => {
+                if (err1) {
+                    return next(err1);
                 }
-            });
 
-            commentedTweet.extras.comments.push(tweet._id);
-            commentedTweet.save(function (err) {
-                if (err) {
-                    return next(err);
-                }
+                tweet.save(function (err) {
+                    if (err) {
+                        return next(err);
+                    } else {
+                        parseTweet(tweet, next, (o) => {
+                            res.status(200).json(o);
+                        }, user);
+                    }
+                });
+
+                commentedTweet.extras.comments.push(tweet._id);
+                commentedTweet.save(function (err) {
+                    if (err) {
+                        return next(err);
+                    }
+                });
             });
         });
     });
