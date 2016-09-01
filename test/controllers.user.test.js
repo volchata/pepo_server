@@ -2,8 +2,10 @@
 
 var httpMocks = require('node-mocks-http');
 var ctr = require('../controllers/user');
+var ctrUsers = require('../controllers/users');
 var User = require('../models/user').User;
-var assert = require('assert');
+//var assert = require('assert');
+var assert = require('chai').assert;
 var when = require('when');
 
 function clear() {
@@ -72,7 +74,10 @@ describe('User controller unit test', function () {
         ctr.user(request, response);
         var json = JSON.parse(response._getData());
         assert.equal(response.statusCode, 200);
-        assert.equal(json.notRegistered, true);
+        assert(json.notRegistered);
+        //assert.equal(json.notRegistered, true);
+        assert.equal(json.followers, 0);
+        assert.equal(json.follows, 0);
         assert.equal(json.avatar, 'http://placehold.it/100x100');
 
     });
@@ -213,6 +218,122 @@ describe('User controller unit test', function () {
 
     });
     it('get posted description', checkSaved);
+    describe('add user to followers', function () {
+        //'/users/:login/follower'
+        it('post user to followers', function (done) {//done required for assinc asserts
+            user2.displayName = '__follows' + (new Date());
+            var data = {
+                method: 'POST',
+                //url: '/api/user',
+                params: {login: user2.displayName}
+            };
+            user2.save(function () {
+                var request = createRequest(data, user1);
+                var response = createResponse();
+                ctr.followUser(request, response);
+
+                response.on('end', function () {
+                    assert.equal(response.statusCode, 200);
+                    var json = JSON.parse(response._getData());
+                    assert.equal(json.follows, 1);
+                    User.findOne({_id: user2._id}).exec(function (err, user) {
+                        assert.equal(!err, true);
+                        assert.lengthOf(user.followers, 1);
+                    });
+                    done();
+                });
+            });
+
+        });
+        it('post user to followers again', function (done) {//done required for assinc asserts
+
+            var data = {
+                method: 'POST',
+                //url: '/api/user',
+                params: {login: user2.displayName}
+            };
+            var request = createRequest(data, user1);
+            var response = createResponse();
+            ctr.followUser(request, response);
+
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.follows, 1);
+                User.findOne({_id: user2._id}).exec(function (err, user) {
+                    assert.equal(!err, true);
+                    assert.lengthOf(user.followers, 1);
+                });
+                done();
+            });
+
+        });
+
+        it('get profile of followed user', function (done) {
+            var request = createRequest({
+                method: 'GET',
+                params: {login: user2.displayName}}, user1);
+            var response = createResponse();
+            ctrUsers.getUserByLogin(request, response);
+            response.on('end', function () {
+                var json = JSON.parse(response._getData());
+                console.log(json);
+                assert.equal(response.statusCode, 200);
+
+                assert.property(json, 'followed');
+                done();
+            });
+
+        });
+
+        it('delete user from followers', function (done) {//done required for assinc asserts
+
+            var data = {
+                method: 'DELETE',
+                //url: '/api/user',
+                params: {login: user2.displayName}
+            };
+            var request = createRequest(data, user1);
+            var response = createResponse();
+            ctr.followUser(request, response);
+
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.follows, 0);
+                User.findOne({_id: user2._id}).exec(function (err, user) {
+                    assert.equal(!err, true);
+                    assert.lengthOf(user.followers, 0);
+                });
+                done();
+            });
+
+        });
+        it('delete user from followers again', function (done) {//done required for assinc asserts
+
+            var data = {
+                method: 'DELETE',
+                //url: '/api/user',
+                params: {login: user2.displayName}
+            };
+            var request = createRequest(data, user1);
+            var response = createResponse();
+            ctr.followUser(request, response);
+
+            response.on('end', function () {
+                assert.equal(response.statusCode, 200);
+                var json = JSON.parse(response._getData());
+                assert.equal(json.follows, 0);
+                User.findOne({_id: user2._id}).exec(function (err, user) {
+                    assert.equal(!err, true);
+                    assert.lengthOf(user.followers, 0);
+                });
+                done();
+            });
+
+        });
+
+    });
     after(function (done) {
         clear();
         done();

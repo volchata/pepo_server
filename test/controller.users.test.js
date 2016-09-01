@@ -4,7 +4,8 @@ var httpMocks = require('node-mocks-http');
 var ctrUser = require('../controllers/user');
 var ctrUsers = require('../controllers/users');
 var User = require('../models/user').User;
-var assert = require('assert');
+//var assert = require('assert');
+var assert = require('chai').assert;
 var when = require('when');
 
 function clear() {
@@ -170,7 +171,7 @@ describe('User controller unit test', function () {
                     var json = JSON.parse(response._getData());
                     assert.equal(json.limit, 50);
                     assert.equal(json.offset, 0);
-                    assert.equal(json.data.length, 50);
+                    assert.lengthOf(json.data, 50);
                     assert.equal(json.total, 300);
                     done();
                 });
@@ -201,7 +202,7 @@ describe('User controller unit test', function () {
             response.on('end', function () {
                 assert.equal(response.statusCode, 200);
                 var json = JSON.parse(response._getData());
-                assert.equal(json.length, 10);
+                assert.lengthOf(json, 10);
 
                 done();
             });
@@ -220,7 +221,7 @@ describe('User controller unit test', function () {
             response.on('end', function () {
                 assert.equal(response.statusCode, 200);
                 var json = JSON.parse(response._getData());
-                assert.equal(json.length, 0);
+                assert.lengthOf(json, 0);
                 done();
             });
 
@@ -282,7 +283,7 @@ describe('User controller unit test', function () {
                     var json = JSON.parse(response._getData());
                     assert.equal(json.limit, 50);
                     assert.equal(json.offset, 0);
-                    assert.equal(json.data.length, 50);
+                    assert.lengthOf(json.data, 50);
                     assert.equal(json.total, 300);
                     done();
                 });
