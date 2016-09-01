@@ -9,8 +9,22 @@ var foreignUserFields = {
     lastName: 1,
     _id: 0};
 function foreignUserToData(user) {
-    return userToData(user);
+    return myForeignUserToData(null, user);
 }
+function myForeignUserToData(me, user) {
+    var meFollow;
+    var data = userToData(user);
+    if (me) {
+        meFollow = me.follows.some(function (foll) {
+            return foll.equals(user.id);
+        });
+        if (meFollow) {
+            data.followed = true;
+        }
+    }
+    return data;
+}
+
 /**
  * @api {get} /api/users/:login Get foreign user profile
  * @apiDescription Return profile of user identified by :login
@@ -22,6 +36,7 @@ function foreignUserToData(user) {
  * @apiSuccess (200) {String} lastName Lastname of the User.
  * @apiSuccess (200) {String} description Description of the User.
  * @apiSuccess (200) {String} avatar Avatar of the User.
+ * @apiSuccess (200) {Boolean} followed Set if user is followed by current user
  * @apiSuccess (200) {Boolean} notRegistered Set if user does not send initial profile update after social login
  * @apiSuccess (200) {Number} followers Number of user's followers
  * @apiSuccess (200) {Number} follows Number of persons that user follows
@@ -40,9 +55,12 @@ function getUserByLogin(req, res, next) {
         } else if (!user) {
             res.status(404).send({status: 'Not found'});
         } else {
-            res.json(foreignUserToData(user));
+            User.findOne({_id: req.user._id}, function (err, cuser) {
+                res.json(myForeignUserToData(cuser, user));
+            });
         }
     });
+
 }
 function getUserChildCollection(child, mapBy) {
     return function (req, res, next) {

@@ -2,6 +2,7 @@
 
 var httpMocks = require('node-mocks-http');
 var ctr = require('../controllers/user');
+var ctrUsers = require('../controllers/users');
 var User = require('../models/user').User;
 //var assert = require('assert');
 var assert = require('chai').assert;
@@ -221,7 +222,6 @@ describe('User controller unit test', function () {
         //'/users/:login/follower'
         it('post user to followers', function (done) {//done required for assinc asserts
             user2.displayName = '__follows' + (new Date());
-
             var data = {
                 method: 'POST',
                 //url: '/api/user',
@@ -264,6 +264,23 @@ describe('User controller unit test', function () {
                     assert.equal(!err, true);
                     assert.lengthOf(user.followers, 1);
                 });
+                done();
+            });
+
+        });
+
+        it('get profile of followed user', function (done) {
+            var request = createRequest({
+                method: 'GET',
+                params: {login: user2.displayName}}, user1);
+            var response = createResponse();
+            ctrUsers.getUserByLogin(request, response);
+            response.on('end', function () {
+                var json = JSON.parse(response._getData());
+                console.log(json);
+                assert.equal(response.statusCode, 200);
+
+                assert.property(json, 'followed');
                 done();
             });
 

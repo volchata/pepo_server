@@ -43,7 +43,7 @@ function userToData(user) {
  * @apiSuccess (200) {String} lastName Lastname of the User.
  * @apiSuccess (200) {String} description Description of the User.
  * @apiSuccess (200) {String} avatar Avatar of the User.
- * @apiSuccess (200) {String} notRegistered Set if user does not send initial profile update after social login
+ * @apiSuccess (200) {Boolean} notRegistered Set if user does not send initial profile update after social login
  * @apiSuccess (200) {Number} followers Number of user's followers
  * @apiSuccess (200) {Number} follows Number of persons that user follows
  * @apiError (Errors) 403 Access denied
