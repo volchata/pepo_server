@@ -118,11 +118,7 @@ function reTweet(req, res, next) {
 
                             tweet.save(function (err) {
                                 if (err) {
-                                    return next(err);
-                                } else {
-                                    parseTweet(tweet, next, (o) => {
-                                        res.status(200).json(o);
-                                    }, user);
+                                    console.log('Error while saving tweet: ', err);
                                 }
                             });
                         });
@@ -132,6 +128,15 @@ function reTweet(req, res, next) {
                             if (err) {
                                 return next(err);
                             }
+                            Tweet.find({_id: parentTweetId}).exec((err1, newTweet) => {
+                                if (err1) {
+                                    return next(err1);
+                                } else {
+                                    parseTweet(newTweet, next, (o) => {
+                                        res.status(200).json(o);
+                                    }, user);
+                                }
+                            });
                         });
                     } else {
                         res.status(200).json({status: 'Already retweeted'});
@@ -452,7 +457,7 @@ function parseTweet(tweets, next, cb, user) {
 
         if (user) {
             var isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
-            var isRetweeted = tweet.extras.retweets.some(x => x.toString() === user._id.toString());
+            var isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()) );
 
             tweet.like = isLiked;
             tweet.retweet = isRetweeted;
