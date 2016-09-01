@@ -20,6 +20,7 @@ function logger(err) {
 }
 
 function addFile(file, cb) {
+    console.log('Preloading');
     var fo = {path: file.path, url: file.url, owner: file.owner._id};
     if (file.target) {
         fo.target = file.target;
@@ -29,6 +30,7 @@ function addFile(file, cb) {
 
     f.save((err)=>{
         if (err) {
+            console.log('Error while saving file:');
             logger(err);
         }
         file.dbo = f;
@@ -156,6 +158,8 @@ function garbageCollector() {
 
 // eslint-disable-next-line no-unused-vars
 function uploadImage(req, res, next) {
+    console.log('Preloading');
+
     if (req.file) {
         res.status(200).json({status: 'OK', image: req.file.url});
     }
