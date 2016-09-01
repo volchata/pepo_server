@@ -11,22 +11,26 @@ function createTwit(user, base, cb ) {
         author: user._id,
         content: base.content,
         extras: { }
-    }
+    };
 
+    var t = ['commentedTweetId', 'geo', 'url', 'parentTweetId', 'image'];
     /*eslint-disable no-unexpected-multiline,no-sequences */
-    ['commentedTweetId', 'geo', 'url', 'parentTweetId', 'image'].forEach((item) => {
+    t.forEach((item) => {
         if (base[item]) {
             b.extras[item] = base[item];
+        } else if (base.extras && base.extras[item]) {
+            b.extras[item] = base.extras[item];
         }
+
     });
 
-    if (base.image) {
-        images.commitFile(base.image, cb);
+    if (b.extras.image) {
+        images.commitFile(b.extras.image, cb);
     }
-    if (base.attachment) {
-        images.commitFile(base.attachment, (err, att)=>{
+    if (b.extras.attachment) {
+        images.commitFile(b.extras.attachment, (err, att)=>{
             if ((att) && (!err)) {
-                b.attachment = {
+                b.extras.attachment = {
                     url: att.target,
                     image: att.url,
                     title: att.title

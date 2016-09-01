@@ -44,7 +44,7 @@ apiRouter
     .get('/tweet/:id/comments', controllers.tweet.getComments)
     .get('/tweet/:id', controllers.tweet.getTweet)
     .post('/user/feed', controllers.tweet.setTweet)
-    .post('/user/image', img.preAdd('image'), img.uploadImage)
+    .post('/user/image', img.preAdd('file'), img.uploadImage)
     .post('/user/snapshot', img.makeSnapshot)
     .get('/user/snapshot/:url([\/a-z0-9_.]+)', img.getSnapshot)
     .post('/users/:login/follower', controllers.user.followUser)
