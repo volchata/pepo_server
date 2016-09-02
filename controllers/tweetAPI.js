@@ -311,6 +311,56 @@ function getTweets(req, res, next) {
     }
 }
 
+function getHistory(req, res, next) {
+    if (!req.params.login) {
+        User.getByReq(req, res, next, (q)=>{
+            q.populate('follows');
+        }).then((user) => {
+            var userFollows = user.follows.map(follower => follower._id);
+            userFollows.push(user._id);
+
+            if (req.query.offset) {
+                Tweet.find({
+                    $and: [
+                    {author: {$in: userFollows}},
+                    {'extras.commentedTweetId': {$exists: false}},
+                    {timestamp: {$lt: req.query.offset}}
+                    ]
+                })
+                .sort({timestamp: -1})
+                .limit(req.query.limit > 50 ? 50 : ((Number(req.query.limit) || 10)))
+                .exec((err, tweets) => {
+                    if (err) {
+                        return next(err);
+                    } else {
+                        parseTweet(tweets, next, (o) => {
+                            res.status(200).json(o);
+                        }, user);
+                    }
+                });
+            } else {
+                Tweet.find({
+                    $and: [
+                    {author: {$in: userFollows}},
+                    {'extras.commentedTweetId': {$exists: false}}
+                    ]
+                })
+                .sort({timestamp: -1})
+                .limit(req.query.limit > 50 ? 50 : ((Number(req.query.limit) || 10)))
+                .exec((err, tweets) => {
+                    if (err) {
+                        return next(err);
+                    } else {
+                        parseTweet(tweets, next, (o) => {
+                            res.status(200).json(o);
+                        }, user);
+                    }
+                });
+            }
+        });
+    }
+}
+
 function getTweet(req, res, next) {
     var tweetId = req.params.id;
 
@@ -486,6 +536,7 @@ module.exports = {
     commentTweet,
     getComments,
     getTweets,
+    getHistory,
     getTweet,
     likeTweet,
     deleteTweet
