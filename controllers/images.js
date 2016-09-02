@@ -1,6 +1,7 @@
 'use strict';
 
 var File = require('../models/file');
+var Tweet = require('../models/tweet');
 var Uploader = require('../libs/fileUploader');
 var uploader = Uploader.create( addFile );
 var mkdirp = require('mkdirp');
@@ -169,10 +170,11 @@ function uploadImage(req, res, next) {
 // eslint-disable-next-line no-unused-vars
 function makeSnapshot(req, res, next) {
     var basename = Date.now() + '.' + snapFormat;
-    console.log('body', req.body);
+    // console.log('body', req.body);
     var ret = Uploader.genFilePath(req.user.displayName, basename);
     ret.target = req.body.url;
     ret.owner = req.user;
+    ret.path = ret.fullpath;
 
     mkdirp(ret.path, (err) => {
         if (err) {
@@ -189,8 +191,20 @@ function makeSnapshot(req, res, next) {
                 ret.dbo.title = title;
                 ret.dbo.save( (err3)=>{
                     if (err3) {
-                        console.log('Error3:', err3);
+                        return console.log('Error3:', err3);
                     }
+                    Tweet.findOne({
+                        'extras.attachment.title': null,
+                        'extras.attachment.url': ret.target
+                    }).exec((err4, tw)=>{
+                        if (err4) {
+                            return console.log('Error4:', err4);
+                        }
+                        tw.extras.attachment.title = title;
+                        tw.save((err5)=>{
+                            return console.log('Error5:', err5);
+                        });
+                    });
                 } );
             } );
         });
