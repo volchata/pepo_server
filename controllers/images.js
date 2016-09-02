@@ -21,7 +21,6 @@ function logger(err) {
 }
 
 function addFile(file, cb) {
-    console.log('Preloading');
     var fo = {path: file.path, url: file.url, owner: file.owner._id};
     if (file.target) {
         fo.target = file.target;
@@ -163,8 +162,9 @@ function uploadImage(req, res, next) {
 
     if (req.file) {
         res.status(200).json({status: 'OK', image: req.file.url});
+    } else {
+        res.status(400).json({status: 'File not found'});
     }
-    res.status(400).json({status: 'File not found'});
 }
 
 // eslint-disable-next-line no-unused-vars
