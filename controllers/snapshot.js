@@ -1,10 +1,9 @@
 'use strict';
 
 const forker = require('child_process').execFile;
-//const encoder = '/home/nuser/wkhtmltopdf/bin/wkhtmltoimage';
-const encoder = 'wkhtmltoimage';
 const conf = require('../conf');
 const path = require('path');
+const encoder = conf.get('snapshotEngineCmd') || 'wkhtmltoimage';
 
 function textEscapeForRE(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&').replace(/\n|\r|\n\r|\r\n/g, '');
@@ -25,7 +24,7 @@ function createSnapshot(src, dst, cb) {
     if (!(cb instanceof Function)) {
         throw new Error('Callback should be a function');
     }
-    forker(encoder, ['-q', src, dst], {timeout: 10000}, (error, stdout, stderr)=>{
+    forker(encoder, [src, dst], {timeout: 10000}, (error, stdout, stderr)=>{
         if (error) {
             console.error('Error was catched while converting to image: \n', error);
             console.log('', stdout);

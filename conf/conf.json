@@ -35,6 +35,7 @@
         "commitTimeout": 300,
         "gcInterval": 1
     },
-    "snapshotsFormat": "jpg"
+    "snapshotsFormat": "jpg",
+    "snapshotEngineCmd": "wkhtmltoimage1"
     
 }
