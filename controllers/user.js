@@ -74,29 +74,26 @@ function user(req, res) {
  */
 function postUser(req, res) {
     var modified = false;
-    var data = {};
     for (var i of ['displayName', 'firstName', 'lastName', 'description']) {
         if (typeof req.body[i] !== 'undefined') {
             req.user[i] = String(req.body[i]).trim();
-            data[i] = req.user[i];
             modified = true;
         }
     }
-
-    if (req.file) {
+/*eslint-disable no-eq-null,eqeqeq */
+    if (req.body.avatar != null) {
         modified = true;
         if (localImg.test(req.user.avatar)) {
             img.removeFile(req.user.avatar); // не ждём завершения процесса
         }
-        req.user.avatar = req.file.url;
+        req.user.avatar = req.body.avatar;
     }
 
     if (modified) {
         req.user.notRegistered = false;
-        data.notRegistered = false;
         req.user.save(function (err) {
-            if (req.file) {
-                img.commitFile(req.file);
+            if (req.body.avatar) {
+                img.commitFile(req.body.avatar);
             }
             if (err) {
                 if ( err.code === 11000 ) {

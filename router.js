@@ -33,8 +33,8 @@ apiRouter
     .use(controllers.auth.ensureAuthenticatedAPI)               // обязательная проверка аутентификации пользователя
     .use(controllers.cors)                                      // и заголовки Cross origin resourse sharing
     .get('/user', controllers.user.user)
-    .post('/user', img.preAdd('avatar'), controllers.user.postUser)
-    //.use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
+    .post('/user', controllers.user.postUser)
+    .use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
     .get('/users/:search/search', controllers.users.searchUsers)
     .get('/users/:login', controllers.users.getUserByLogin)
     .get('/users/:login/feed', controllers.tweet.getTweets)
