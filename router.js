@@ -34,7 +34,7 @@ apiRouter
     .use(controllers.cors)                                      // и заголовки Cross origin resourse sharing
     .get('/user', controllers.user.user)
     .post('/user', img.preAdd('avatar'), controllers.user.postUser)
-    .use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
+    //.use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
     .get('/users/:search/search', controllers.users.searchUsers)
     .get('/users/:login', controllers.users.getUserByLogin)
     .get('/users/:login/feed', controllers.tweet.getTweets)
@@ -54,6 +54,7 @@ apiRouter
     .delete('/users/:login/follower', controllers.user.followUser)
     .delete('/tweet/:id/like', controllers.tweet.likeTweet)
     .delete('/tweet/:id', controllers.tweet.deleteTweet)
+    .delete('/tweet/:id/retweet', controllers.tweet.deleteReTweet)
     .use(controllers.auth.wrongAPIPoint);
 
 module.exports = function (app) {

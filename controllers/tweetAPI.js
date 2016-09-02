@@ -97,16 +97,16 @@ function reTweet(req, res, next) {
         }
 
         Tweet.findById(parentTweetId)
-                .exec((err, parentTweet) => {
-                    if (err) {
-                        return next(err);
-                    }
+            .exec((err, parentTweet) => {
+                if (err) {
+                    return next(err);
+                }
 
-                    if (!parentTweet) {
-                        return res.status(404).json({status: 'Tweet not found'});
-                    }
+                if (!parentTweet) {
+                    return res.status(404).json({status: 'Tweet not found'});
+                }
 
-                    var isRetweet = parentTweet.extras.retweets.some(x => x.toString() === user._id.toString());
+                var isRetweet = parentTweet.extras.retweets.some(x => x.toString() === user._id.toString());
 
                     if (!isRetweet) {
                         req.body.parentTweetId = parentTweetId;
@@ -319,8 +319,8 @@ function getTweet(req, res, next) {
     }
     User.findOne({
         $and: [
-                {socialNetworkId: req.user.socialNetworkId},
-                {provider: req.user.provider}
+            {socialNetworkId: req.user.socialNetworkId},
+            {provider: req.user.provider}
         ]
     })
         .exec((err, user) => {
@@ -445,6 +445,68 @@ function deleteTweet(req, res, next) {
     });
 }
 
+function deleteReTweet(req, res, next) {
+    var tweetId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+        return res.status(404).json({status: 'Tweet not found'});
+    }
+
+    User.findOne({
+        $and: [
+            {socialNetworkId: req.user.socialNetworkId},
+            {provider: req.user.provider}
+        ]}, (err, user) => {
+
+        if (!User.isUser(req, res, err, user, next)) {
+            return;
+        }
+
+        Tweet.findById(tweetId)
+            .exec((err, parentTweet) => {
+                if (err) {
+                    return next(err);
+                }
+
+                if (!parentTweet) {
+                    return res.status(404).json({status: 'Tweet not found'});
+                }
+
+                Tweet.find({
+                    $and: [
+                        {author: user._id},
+                        {'extras.parentTweetId': tweetId}
+                    ]})
+                    .remove()
+                    .exec((err) => {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        var index = parentTweet.extras.retweets.indexOf(user._id);
+                        
+                        if (index !== -1) {
+                            parentTweet.extras.retweets.splice(index, 1);
+                            parentTweet.save(function (err) {
+                                if (err) {
+                                    return next(err);
+                                }
+
+                                parseTweet(parentTweet, next, (o) => {
+                                    res.status(200).json(o);
+                                }, user);
+                            });
+                        } else {
+                            parseTweet(parentTweet, next, (o) => {
+                                res.status(200).json(o);
+                            }, user);
+                        }
+
+                    });
+            });
+    });
+}
+
 function parseTweet(tweets, next, cb, user) {
     var users = {};
     if (!(tweets instanceof Array)) {
@@ -488,5 +550,6 @@ module.exports = {
     getTweets,
     getTweet,
     likeTweet,
-    deleteTweet
+    deleteTweet,
+    deleteReTweet
 };
