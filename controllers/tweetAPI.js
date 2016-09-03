@@ -27,7 +27,9 @@ function createTwit(user, base, cb ) {
     });
 
     if (b.extras.image) {
-        images.commitFile(b.extras.image, cb);
+        images.commitFile(b.extras.image, (err)=>{
+            console.log('Error while commiting image:', err);
+        });
     }
     if (b.extras.attachment) {
         images.commitFile(b.extras.attachment, (err, att)=>{
@@ -516,15 +518,25 @@ function parseTweet(tweets, next, cb, user) {
     }
 
     tweets = tweets.map(x => {
+        var isLiked;
+        var isRetweeted;
         var tweet = x.toJSON();
         users[tweet.author] = null;
 
-        if (user) {
-            var isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
-            var isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()) );
+        if (user && tweet.extras) {
+            if (tweet.extras.likes) {
+                isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
+            }
+            if (tweet.extras.retweets) {
+                isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()) );
+            }
 
             tweet.like = isLiked;
             tweet.retweet = isRetweeted;
+        } else {
+            if (!(tweet.extras)) {
+                tweet.extras = {};
+            }
         }
 
         return tweet;
