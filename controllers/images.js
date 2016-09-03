@@ -1,7 +1,7 @@
 'use strict';
 
 var File = require('../models/file');
-var Tweet = require('../models/tweet');
+var Tweet = require('../models/tweet').Tweet;
 var Uploader = require('../libs/fileUploader');
 var uploader = Uploader.create( addFile );
 var mkdirp = require('mkdirp');
@@ -71,9 +71,9 @@ function removeFile(url, cb) {
 
 function commitFile(file, cb) { // Товарищ! Помни! Отсутствие транзакций -- убивает! :'-(
     if (typeof file === 'string') {
-        File.getByURL( (err, file) => {
-            if ((!err) && (file)) {
-                return file.commit(cb);
+        File.getByURL(file, (err, nfile) => {
+            if ((!err) && (nfile)) {
+                return nfile.commit(cb);
             }
             if (!err) {
                 err = 'File not found!';
@@ -158,7 +158,6 @@ function garbageCollector() {
 
 // eslint-disable-next-line no-unused-vars
 function uploadImage(req, res, next) {
-    console.log('Preloading');
 
     if (req.file) {
         res.status(200).json({status: 'OK', image: req.file.url});
@@ -174,16 +173,18 @@ function makeSnapshot(req, res, next) {
     var ret = Uploader.genFilePath(req.user.displayName, basename);
     ret.target = req.body.url;
     ret.owner = req.user;
-    ret.path = ret.fullpath;
 
     mkdirp(ret.path, (err) => {
         if (err) {
-            return console.log('Error:', err);
+            return next(err);
         }
+        ret.path = ret.fullpath;
         addFile(ret, (err1)=>{
             if (err1) {
-                return console.log('Error:', err1);
+                return next(err1);
             }
+            res.json({status: 'OK', attachment: ret.url});
+
             createSnapshot(req.body.url, ret.fullpath, (err2, title)=>{
                 if (err2) {
                     return console.log('Error:', err2);
@@ -200,10 +201,12 @@ function makeSnapshot(req, res, next) {
                         if (err4) {
                             return console.log('Error4:', err4);
                         }
-                        tw.extras.attachment.title = title;
-                        tw.save((err5)=>{
-                            return console.log('Error5:', err5);
-                        });
+                        if (tw) {
+                            tw.extras.attachment.title = title;
+                            tw.save((err5)=>{
+                                return console.log('Error5:', err5);
+                            });
+                        }
                     });
                 } );
             } );
@@ -211,7 +214,6 @@ function makeSnapshot(req, res, next) {
 
     });
 
-    res.json({status: 'OK', attachment: ret.url});
 }
 
 function getSnapshot(req, res, next) {
@@ -226,15 +228,19 @@ function getSnapshot(req, res, next) {
             }
             if (file.title) {
                 res.json({
-                    url: file.target,
-                    image: file.url,
-                    title: file.title
+                    status: 'OK',
+                    attachment: {
+                        url: file.target,
+                        image: file.url,
+                        title: file.title
+                    }
                 });
             } else {
                 if (cycles > 0) {     // костыли костылёзные, но некогда писать на ивентах, но я обещаю, что перепишу
                     cycles--;
-                    setTimeout(reporter, 1000);
+                    setTimeout(reporter, 1500);
                 } else {
+                    removeFile(file.url);
                     res.json({status: 'UnSuccessful'});
                 }
             }

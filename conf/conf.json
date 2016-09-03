@@ -36,6 +36,7 @@
         "gcInterval": 1
     },
     "snapshotsFormat": "jpg",
-    "snapshotEngineCmd": "wkhtmltoimage1"
+    "snapshotEngineCmd": "wkhtmltoimage",
+    "snapshotEngineOpts": [ "-n", "--height", "800" ]
     
 }

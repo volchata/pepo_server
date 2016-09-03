@@ -86,7 +86,17 @@ function wrongAPIPoint(req, res, next) {
     return res.status(404).json({status: 'WrongAPIPoint'});
 }
 
+// eslint-disable-next-line no-unused-vars
+function responder404(req, res, next) {
+    var str = '<h1>:\'-(</h1> ';
+    str += '<h2>То, что вы искали не нашлось...</h2>';
+    str += '<h3>Нам очень жаль.. Правда.. </h3>';
+    str += '<a href="/">Попробуйте начать сначала! :)</a>';
+    res.status(500).send(str);
+}
+
 module.exports = {
+    responder404,
     logout,
     startApp,
     wrongAPIPoint,
