@@ -14,6 +14,14 @@ if ((!snapFormat) || (!snapFormat.lenght)) {
     snapFormat = 'jpg';
 }
 
+function prefixOuterURL(url) {
+    var re = /^https?:\/\//;
+    if (!(re.test(url))) {
+        url = 'http://' + url;
+    }
+    return url; //encodeURI(url);
+}
+
 function logger(err) {
     if (err) {
         console.error(err);
@@ -171,48 +179,60 @@ function makeSnapshot(req, res, next) {
     var basename = Date.now() + '.' + snapFormat;
     // console.log('body', req.body);
     var ret = Uploader.genFilePath(req.user.displayName, basename);
-    ret.target = req.body.url;
-    ret.owner = req.user;
+    var curl;
+    if (req.body.url) {
+        req.body.url = req.body.url.trim();
+        curl = req.body.url.replace(/https?:\/\//, '');
+    }
 
-    mkdirp(ret.path, (err) => {
-        if (err) {
-            return next(err);
-        }
-        ret.path = ret.fullpath;
-        addFile(ret, (err1)=>{
-            if (err1) {
-                return next(err1);
+    if (req.body.url && curl) {
+        ret.target = prefixOuterURL(req.body.url.trim());
+        ret.owner = req.user;
+
+        mkdirp(ret.path, (err) => {
+            if (err) {
+                return next(err);
             }
-            res.json({status: 'OK', attachment: ret.url});
-
-            createSnapshot(req.body.url, ret.fullpath, (err2, title)=>{
-                if (err2) {
-                    return console.log('Error:', err2);
+            ret.path = ret.fullpath;
+            addFile(ret, (err1)=>{
+                if (err1) {
+                    return next(err1);
                 }
-                ret.dbo.title = title;
-                ret.dbo.save( (err3)=>{
-                    if (err3) {
-                        return console.log('Error3:', err3);
-                    }
-                    Tweet.findOne({
-                        'extras.attachment.title': null,
-                        'extras.attachment.url': ret.target
-                    }).exec((err4, tw)=>{
-                        if (err4) {
-                            return console.log('Error4:', err4);
-                        }
-                        if (tw) {
-                            tw.extras.attachment.title = title;
-                            tw.save((err5)=>{
-                                return console.log('Error5:', err5);
-                            });
-                        }
-                    });
-                } );
-            } );
-        });
+                res.json({status: 'OK', attachment: ret.url});
 
-    });
+                createSnapshot(req.body.url, ret.fullpath, (err2, title)=>{
+                    if (err2) {
+                        return console.log('Error:', err2);
+                    }
+                    ret.dbo.title = title;
+                    ret.dbo.save( (err3)=>{
+                        if (err3) {
+                            return console.log('Error3:', err3);
+                        }
+                        Tweet.findOne({
+                            'extras.attachment.title': null,
+                            'extras.attachment.url': ret.target
+                        }).exec((err4, tw)=>{
+                            if (err4) {
+                                return console.log('Error4:', err4);
+                            }
+                            if (tw) {
+                                tw.extras.attachment.title = title;
+                                tw.save((err5)=>{
+                                    if (err5) {
+                                        return console.log('Error5:', err5);
+                                    }
+                                });
+                            }
+                        });
+                    } );
+                } );
+            });
+
+        });
+    } else {
+        res.json({status: 'Empty url'});
+    }
 
 }
 

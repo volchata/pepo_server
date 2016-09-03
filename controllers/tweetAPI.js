@@ -6,14 +6,23 @@ var User = require('../models/user').User;
 var userFilter = require('./user');
 var images = require('./images');
 
+var Encoder = (new (require('node-html-encoder').Encoder)('entity'));
+var encode = ( Encoder.htmlEncode.bind(Encoder) );
+
+function prefixOuterURL(url) {
+    var re = /^https?:\/\//;
+    if (!(re.test(url))) {
+        url = 'http://' + url;
+    }
+    return url; //encodeURI(url);
+}
+
 function createTwit(user, base, cb ) {
     var b = {
         author: user._id,
-        content: base.content,
+        content: encode(base.content),
         extras: { }
     };
-
-    console.log('base', base);
 
     var t = ['commentedTweetId', 'geo', 'url', 'parentTweetId', 'image', 'attachment'];
     /*eslint-disable no-unexpected-multiline,no-sequences */
@@ -26,9 +35,15 @@ function createTwit(user, base, cb ) {
 
     });
 
+    if (b.extras.url) {
+        b.extras.url = prefixOuterURL(b.extras.url);
+    }
+
     if (b.extras.image) {
         images.commitFile(b.extras.image, (err)=>{
-            console.log('Error while commiting image:', err);
+            if (!err) {
+                console.log('Error while commiting image:', err);
+            }
         });
     }
     if (b.extras.attachment) {
