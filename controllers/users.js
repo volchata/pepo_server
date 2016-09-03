@@ -1,6 +1,7 @@
 'use strict';
 var userToData = require('./user.js').userToData;
 var User = require('../models/user').User;
+var Tweet = require('../models/tweet').Tweet;
 
 var foreignUserFields = {
     displayName: 1,
@@ -56,7 +57,24 @@ function getUserByLogin(req, res, next) {
             res.status(404).send({status: 'Not found'});
         } else {
             User.findOne({_id: req.user._id}, function (err, cuser) {
-                res.json(myForeignUserToData(cuser, user));
+                Tweet.find({
+                    $and: [
+                        {author: user._id},
+                        {'extras.commentedTweetId': {$exists: false}}
+                    ]
+                })
+                .sort({timestamp: -1})
+                .limit(10)
+                .exec((err, tweets) => {
+                    if (err) {
+                        console.log('err', err);
+                        return next(err);
+                    } else {
+                        parseTweet(tweets, next, (o) => {
+                            res.status(200).json(o);
+                        }, user);
+                    }
+                });
             });
         }
     });
@@ -163,6 +181,52 @@ function searchUsers(req, res, next) {
                 res.json(users.map(foreignUserToData));
             }}
     );
+}
+
+function parseTweet(tweets, next, cb, user) {
+
+    var users = {};
+    if (!(tweets instanceof Array)) {
+        tweets = [tweets];
+    }
+
+    tweets = tweets.map(x => {
+        var isLiked;
+        var isRetweeted;
+        var tweet = x.toJSON();
+        users[tweet.author] = null;
+
+        if (user && tweet.extras) {
+            if (tweet.extras.likes) {
+                isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
+            }
+            if (tweet.extras.retweets) {
+                isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()) );
+            }
+
+            tweet.like = isLiked;
+            tweet.retweet = isRetweeted;
+        } else {
+            if (!(tweet.extras)) {
+                tweet.extras = {};
+            }
+        }
+
+        return tweet;
+    });
+
+    User.find({_id: {$in: Object.keys(users)}})
+        .exec((err, authors) => {
+            if (err) {
+                return next(err);
+            }
+
+            authors.forEach(u => {
+                users[u._id] = userToData(u);
+            });
+
+            cb( {tweets: tweets, users: users} );
+        });
 }
 
 module.exports = {
