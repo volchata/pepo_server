@@ -18,7 +18,7 @@ commonRouter        // роутер для обычных путей аутен�
     .get('/auth/fb', controllers.auth.authFB)
     .get('/auth/fb/callback', controllers.auth.authFB)
     .use('/doc/api', express.static('apidoc'))
-    .use(config.get('storage:web'), express.static( config.get('storage:dir') ))
+    .use(config.get('storage:web'), express.static( config.get('storage:dir') ), controllers.auth.responder404)
     .get('/favicon.ico', rproxy)
     .get(/\.js$|\.css$/, rproxy)
     .use(controllers.auth.ensureAuthenticated)  // точка проверки аутентификации

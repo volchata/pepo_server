@@ -13,7 +13,9 @@ function createTwit(user, base, cb ) {
         extras: { }
     };
 
-    var t = ['commentedTweetId', 'geo', 'url', 'parentTweetId', 'image'];
+    console.log('base', base);
+
+    var t = ['commentedTweetId', 'geo', 'url', 'parentTweetId', 'image', 'attachment'];
     /*eslint-disable no-unexpected-multiline,no-sequences */
     t.forEach((item) => {
         if (base[item]) {
@@ -108,40 +110,40 @@ function reTweet(req, res, next) {
 
                 var isRetweet = parentTweet.extras.retweets.some(x => x.toString() === user._id.toString());
 
-                    if (!isRetweet) {
-                        req.body.parentTweetId = parentTweetId;
+                if (!isRetweet) {
+                    req.body.parentTweetId = parentTweetId;
 
-                        createTwit(user, req.body, (err1, tweet) => {
+                    createTwit(user, req.body, (err1, tweet) => {
+                        if (err1) {
+                            return next(err1);
+                        }
+
+                        tweet.save(function (err) {
+                            if (err) {
+                                console.log('Error while saving tweet: ', err);
+                            }
+                        });
+                    });
+
+                    parentTweet.extras.retweets.push(user._id);
+                    parentTweet.save(function (err) {
+                        if (err) {
+                            return next(err);
+                        }
+                        Tweet.find({_id: parentTweetId}).exec((err1, newTweet) => {
                             if (err1) {
                                 return next(err1);
+                            } else {
+                                parseTweet(newTweet, next, (o) => {
+                                    res.status(200).json(o);
+                                }, user);
                             }
-
-                            tweet.save(function (err) {
-                                if (err) {
-                                    console.log('Error while saving tweet: ', err);
-                                }
-                            });
                         });
-
-                        parentTweet.extras.retweets.push(user._id);
-                        parentTweet.save(function (err) {
-                            if (err) {
-                                return next(err);
-                            }
-                            Tweet.find({_id: parentTweetId}).exec((err1, newTweet) => {
-                                if (err1) {
-                                    return next(err1);
-                                } else {
-                                    parseTweet(newTweet, next, (o) => {
-                                        res.status(200).json(o);
-                                    }, user);
-                                }
-                            });
-                        });
-                    } else {
-                        res.status(200).json({status: 'Already retweeted'});
-                    }
-                });
+                    });
+                } else {
+                    res.status(200).json({status: 'Already retweeted'});
+                }
+            });
     });
 }
 
@@ -484,7 +486,7 @@ function deleteReTweet(req, res, next) {
                         }
 
                         var index = parentTweet.extras.retweets.indexOf(user._id);
-                        
+
                         if (index !== -1) {
                             parentTweet.extras.retweets.splice(index, 1);
                             parentTweet.save(function (err) {
