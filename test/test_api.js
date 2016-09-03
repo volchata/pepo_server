@@ -36,7 +36,7 @@ describe('Unauthed access:', function () {
     // eslint-disable-next-line no-invalid-this
     this.timeout(1000);
 
-    describe('"/" should redirect to /auth:', function () {
+/*    describe('"/" should redirect to /auth:', function () {
         it('GET /', function () {
             return chai.request(app).get('/')
                 .then(function (res) {
@@ -46,7 +46,7 @@ describe('Unauthed access:', function () {
                 });
         });
     });
-
+*/
     describe('protected points should return status 403 with JSON {"status": "..."}:', function () {
         protectedPoints.forEach((point) => {
             it(point.m + ' ' + point.url, function () {
