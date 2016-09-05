@@ -56,7 +56,7 @@ function getUserByLogin(req, res, next) {
         } else if (!user) {
             res.status(404).send({status: 'Not found'});
         } else {
-            User.findOne({_id: req.user._id}, function (err, cuser) {
+            User.findOne({_id: req.user._id}, function () {
                 Tweet.find({
                     $and: [
                         {author: user._id},
