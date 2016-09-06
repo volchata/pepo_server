@@ -49,13 +49,15 @@ describe('User controller unit test', function () {
         var request = createRequest({method: 'GET', url: '/api/user'}, user1);
         var response = createResponse();
         ctr.user(request, response);
-        var json = JSON.parse(response._getData());
-        for (var i in Json1) {
-            if (!(i in skipCheck) || !skipCheck[i] ) {
-                assert.equal(json[i], Json1[i]);
-            }
+        response.on('end', function () {
+            var json = JSON.parse(response._getData());
+            for (var i in Json1) {
+                if (!(i in skipCheck) || !skipCheck[i]) {
+                    assert.equal(json[i], Json1[i]);
+                }
 
-        }
+            }
+        });
     }
 
     before(function () {
@@ -68,17 +70,32 @@ describe('User controller unit test', function () {
     //beforeEach(function (done) {
     //    app = require('../passportHelper').prepApp(done);
     //});
-    it('get user', function () {
+    it('get user', function (done) {
         var request = createRequest({method: 'GET', url: '/api/user'}, user1);
-        var response = httpMocks.createResponse();
-        ctr.user(request, response);
-        var json = JSON.parse(response._getData());
-        assert.equal(response.statusCode, 200);
-        assert(json.notRegistered);
-        //assert.equal(json.notRegistered, true);
-        assert.equal(json.followers, 0);
-        assert.equal(json.follows, 0);
-        assert.equal(json.avatar, 'http://placehold.it/100x100');
+        var response = createResponse();
+        ctr.user(request, response, function (err) {
+            console.log(err);
+            assert(false, 'Next called');
+        });
+        response.on('end', function () {
+            var json = JSON.parse(response._getData());
+            assert.equal(response.statusCode, 200);
+            assert(json.notRegistered);
+            //assert.equal(json.notRegistered, true);
+            assert.equal(json.followers, 0);
+            assert.equal(json.follows, 0);
+            assert.equal(json.avatar, 'http://placehold.it/100x100');
+
+            assert.isArray(json.tweetsILike);
+            assert.lengthOf(json.tweetsILike, 0);
+            assert.isArray(json.tweetsILikeImages);
+            assert.lengthOf(json.tweetsILikeImages, 0);
+            assert.isArray(json.tweets);
+            assert.lengthOf(json.tweets, 0);
+            assert.isObject(json.users);
+            assert(json.users[user1.id] !== undefined);
+            done();
+        });
 
     });
     it('post displayName', function (done) {//done required for assinc asserts
@@ -111,6 +128,7 @@ describe('User controller unit test', function () {
 
     });
     it('get posted displayName', checkSaved);
+
     it('post conflict displayName to user2', function (done) {//done required for assinc asserts
         var data = {
             method: 'POST',
