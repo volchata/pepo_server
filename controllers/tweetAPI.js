@@ -3,7 +3,8 @@
 var mongoose = require('mongoose');
 var Tweet = require('../models/tweet').Tweet;
 var User = require('../models/user').User;
-var userFilter = require('./user');
+//var userFilter = require('./user');
+var parseTweet = require('./users').parseTweet;
 var images = require('./images');
 
 var Encoder = (new (require('node-html-encoder').Encoder)('entity'));
@@ -599,7 +600,7 @@ function deleteReTweet(req, res, next) {
             });
     });
 }
-
+/*
 function parseTweet(tweets, next, cb, user) {
     var users = {};
     if (!(tweets instanceof Array)) {
@@ -644,7 +645,7 @@ function parseTweet(tweets, next, cb, user) {
             cb( {tweets: tweets, users: users} );
         });
 }
-
+*/
 module.exports = {
     setTweet,
     reTweet,
