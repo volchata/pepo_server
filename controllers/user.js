@@ -21,6 +21,10 @@ var when = require('when');
  * @apiSuccess (200) {String} description Description of the User.
  * @apiSuccess (200) {String} avatar Avatar of the User.
  * @apiSuccess (200) {Boolean} notRegistered Set if user does not send initial profile update after social login
+ * @apiSuccess (200) {Array} tweetsILike Last tweets user likes
+ * @apiSuccess (200) {Array} tweetsILikeImages Last tweets with images user likes
+ * @apiSuccess (200) {Array} tweets Last user tweets
+ * @apiSuccess (200) {Object} users Users for tweets collection. At least contains current user.
  * @apiSuccess (200) {Number} followers Number of user's followers
  * @apiSuccess (200) {Number} follows Number of persons that user follows
  * @apiError (Errors) 403 Access denied
@@ -28,29 +32,28 @@ var when = require('when');
  * @param res
  */
 function user(req, res, next) {
-    /*Tweet.userTweetsCombined(req.user).then(function (stat) {
+    Tweet.userTweetsCombined(req.user).then(function (stat) {
         var userData = userToData(req.user);
-        var res={};
+        var resData = {};
         var obj = usersCtr.tweetsToJson(stat[2], req.user);
-        res.tweetsILike = obj.tweets;
+        resData.tweetsILike = obj.tweets;
         obj = usersCtr.tweetsToJson(stat[1], req.user, obj.users);
-        res.tweetsILikeImages = obj.tweets;
+        resData.tweetsILikeImages = obj.tweets;
         obj = usersCtr.tweetsToJson(stat[0], req.user, obj.users);
-        res.tweets=obj.tweets;
-        res.users=obj.users;
+        resData.tweets = obj.tweets;
+        resData.users = obj.users;
         //res = Object.assign(userData, res);
         //res.json(obj);
-        usersCtr.loadUsersToObj(res.users).then(function () {
+        usersCtr.loadUsersToObj(resData.users).then(function () {
                 //cb( {tweets: obj.tweets, users: users} );
-             res = Object.assign(userData, res);
-
-            console.log(['GGG', obj]);
-            res.json(obj);
+            resData = Object.assign(userData, resData);
+             //console.log(['GGG', res]);
+            res.json(resData);
 
         }).catch(next);
 
-    }).catch(next);*/
-    res.json(userToData(req.user));
+    }).catch(next);
+    //res.json(userToData(req.user));
 }
 
 /**

@@ -32,15 +32,9 @@ function myForeignUserToData(me, user) {
  * @apiGroup User
  * @apiVersion 0.1.0
  * @apiParam {String} :login User login
- * @apiSuccess (200) {String} displayName Displayname of the User.
- * @apiSuccess (200) {String} firstName Firstname of the User.
- * @apiSuccess (200) {String} lastName Lastname of the User.
- * @apiSuccess (200) {String} description Description of the User.
- * @apiSuccess (200) {String} avatar Avatar of the User.
  * @apiSuccess (200) {Boolean} followed Set if user is followed by current user
- * @apiSuccess (200) {Boolean} notRegistered Set if user does not send initial profile update after social login
- * @apiSuccess (200) {Number} followers Number of user's followers
- * @apiSuccess (200) {Number} follows Number of persons that user follows
+ * @apiSuccess (200) {Array} tweets Last user tweets
+ * @apiSuccess (200) {Object} users Users for tweets collection. At least contains current user.
  * @apiError (Errors) 403 Access denied
  * @apiError (Errors) 404 User not found
  * @apiError (Errors) 500 Error
