@@ -274,12 +274,12 @@ describe('User controller unit test', function () {
                 method: 'GET',
                 params: {login: user2.displayName}}, user1);
             var response = createResponse();
-            ctrUsers.getUserByLogin(request, response);
+            ctrUsers.getUserByLogin(request, response, function (err) {
+                console.log(['{{{', err]);
+            });
             response.on('end', function () {
                 var json = JSON.parse(response._getData());
-                console.log(json);
                 assert.equal(response.statusCode, 200);
-
                 assert.property(json, 'followed');
                 done();
             });

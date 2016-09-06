@@ -86,7 +86,11 @@ function commitFile(file, cb) { // Товарищ! Помни! Отсутств�
             if (!err) {
                 err = 'File not found!';
             }
-            return cb(err);
+            if ( (cb instanceof Function)) {
+                return cb(err);
+            } else {
+                return console.error(err);
+            }
         } );
     } else {
         file.dbo.commit( err => {

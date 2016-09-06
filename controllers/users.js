@@ -1,5 +1,5 @@
 'use strict';
-var userToData = require('./user.js').userToData;
+var userToData = require('../libs/utils.js').userToData;
 var User = require('../models/user').User;
 var Tweet = require('../models/tweet').Tweet;
 
@@ -57,6 +57,11 @@ function getUserByLogin(req, res, next) {
             res.status(404).send({status: 'Not found'});
         } else {
             User.findOne({_id: req.user._id}, function (err, cuser) {
+                //var json=myForeignUserToData(cuser,user);
+                var meFollow = cuser.follows.some(function (foll) {
+                    return foll.equals(user.id);
+                });
+
                 Tweet.find({
                     $and: [
                         {author: user._id},
@@ -71,6 +76,10 @@ function getUserByLogin(req, res, next) {
                         return next(err);
                     } else {
                         parseTweet(tweets, next, (o) => {
+
+                            if (meFollow) {
+                                o.followed = true;
+                            }
                             res.status(200).json(o);
                         }, user);
                     }
@@ -183,7 +192,74 @@ function searchUsers(req, res, next) {
     );
 }
 
+function tweetsToJson(tweets, user, users) {
+    var def = {};
+    def[user._id] = null;
+    users = users || def;
+    if (!(tweets instanceof Array)) {
+        tweets = [tweets];
+    }
+    tweets = tweets.map(x => {
+        var isLiked;
+        var isRetweeted;
+        var tweet = x.toJSON();
+        if (users[tweet.author] === undefined) {
+            users[tweet.author] = null;
+        }
+        if (user && tweet.extras) {
+            if (tweet.extras.likes) {
+                isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
+            }
+            if (tweet.extras.retweets) {
+                isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()));
+            }
+
+            tweet.like = isLiked;
+            tweet.retweet = isRetweeted;
+        } else {
+            if (!(tweet.extras)) {
+                tweet.extras = {};
+            }
+        }
+
+        return tweet;
+    });
+    return {
+        tweets,
+        users
+    };
+}
+
+function loadUsersToObj(users) {
+    return new Promise(function (resolve, reject) {
+        User.find({_id: {$in: Object.keys(users)}})
+            .exec((err, authors) => {
+                if (!err) {
+                    authors.forEach(u => {
+                        users[u._id] = userToData(u);
+                    });
+                    resolve(users);
+                } else {
+                    reject(err);
+                }
+            });
+    });
+
+}
+
 function parseTweet(tweets, next, cb, user) {
+    var obj = tweetsToJson(tweets, user);
+    return loadUsersToObj(obj.users).then(function () {
+        //cb( {tweets: obj.tweets, users: users} );
+        cb( obj );
+
+    }).catch(function (err) {
+        console.log(err);
+    });
+
+}
+
+/*function parseTweet(tweets, next, cb, user) {
 
     var users = {};
     if (!(tweets instanceof Array)) {
@@ -228,11 +304,14 @@ function parseTweet(tweets, next, cb, user) {
             cb( {tweets: tweets, users: users} );
         });
 }
-
+*/
 module.exports = {
     foreignUserToData,
     getUserByLogin,
     getUserFollowers,
     getUserFollows,
-    searchUsers
+    searchUsers,
+    parseTweet,
+    tweetsToJson,
+    loadUsersToObj
 };
