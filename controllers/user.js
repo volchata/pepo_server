@@ -94,7 +94,7 @@ function postUser(req, res) {
                 img.commitFile(req.body.avatar);
             }
             if (err) {
-                if ( err.code === 11000 ) {
+                if ( err.code === 11000 || err.code === 11001 ) {
                     res.status(409).send({status: 'Duplicate key'});
                 } else {
                     res.status(400).send({status: 'Error saving data'});
