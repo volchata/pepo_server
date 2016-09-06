@@ -310,6 +310,30 @@ function getTweets(req, res, next) {
                 });
             }
         });
+    } else if (req.params.login) {
+        User.findOne({displayName: req.params.login})
+            .exec((err, user) => {
+                console.log('user', user);
+                Tweet.find({
+                    $and: [
+                        {author: user._id},
+                        {'extras.commentedTweetId': {$exists: false}}
+                    ]
+                })
+                .sort({timestamp: -1})
+                .limit(50)
+                .exec((err, tweets) => {
+                    if (err) {
+                        return next(err);
+                    } else {
+                        parseTweet(tweets, next, (o) => {
+                            res.status(200).json(o);
+                        }, user);
+                    }
+                });
+            });
+    } else {
+        res.status(200).json({status: 'error'});
     }
 }
 
