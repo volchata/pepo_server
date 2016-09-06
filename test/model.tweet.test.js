@@ -6,7 +6,9 @@ var assert = require('chai').assert;
 var when = require('when');
 
 function clear() {
-    User.find({provider: 'testprovider'}).remove().exec();
+    return User.find({provider: 'testprovider'}).exec(function (err, users) {
+        Tweet.find({author: users}).remove().exec();
+    });
 }
 
 describe('TweetAPI model unit test', function () {
@@ -25,11 +27,15 @@ describe('TweetAPI model unit test', function () {
         displayName: 'testprovider_2000'
     };
 
-    before(function () {
-        clear();
-        user1 = new User(Json1);
-        user2 = new User(Json2);
-        return when.all([user1.save(), user2.save()]);
+    before(function (done) {
+        clear().then(function () {
+            user1 = new User(Json1);
+            user2 = new User(Json2);
+            when.all([user1.save(), user2.save()]).then(function () {
+                done();
+            });
+        });
+
     });
 
     it('test combined twits', function (done) {
@@ -79,7 +85,9 @@ describe('TweetAPI model unit test', function () {
     });
 
     after(function (done) {
-        //clear();
-        done();
+        clear().then(function () {
+            done();
+        });
+
     });
 });

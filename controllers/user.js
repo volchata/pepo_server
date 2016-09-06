@@ -1,37 +1,14 @@
 'use strict';
 
 var User = require('../models/user').User;
+var Tweet = require('../models/tweet').Tweet;
+var textEscapeForRE = require('../libs/utils').textEscapeForRE;
+var userToData = require('../libs/utils').userToData;
 var webPref = require('../conf').get('storage:web');
 var localImg = new RegExp( textEscapeForRE(webPref), 'i');
+var usersCtr = require('../controllers/users');
 var img = require('./images');
 var when = require('when');
-
-function textEscapeForRE(text) {
-    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&').replace(/\n|\r|\n\r|\r\n/g, '');
-}
-
-function userToData(user) {
-    var data = {
-        displayName: user.displayName,
-        //socialNetworkId: req.user.socialNetworkId,
-        //provider: req.user.provider,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        description: user.description,
-        avatar: user.avatar ? user.avatar : 'http://placehold.it/100x100'
-    };
-    if (typeof user.followers !== 'undefined') {
-        data.followers = user.followers.length;
-    }
-    if (typeof user.follows !== 'undefined') {
-        data.follows = user.follows.length;
-    }
-
-    if (user.notRegistered) {
-        data.notRegistered = true;
-    }
-    return data;
-}
 
 /**
  * @api {get} /api/user Get user profile
@@ -50,8 +27,29 @@ function userToData(user) {
  * @param req
  * @param res
  */
-function user(req, res) {
+function user(req, res, next) {
+    /*Tweet.userTweetsCombined(req.user).then(function (stat) {
+        var userData = userToData(req.user);
+        var res={};
+        var obj = usersCtr.tweetsToJson(stat[2], req.user);
+        res.tweetsILike = obj.tweets;
+        obj = usersCtr.tweetsToJson(stat[1], req.user, obj.users);
+        res.tweetsILikeImages = obj.tweets;
+        obj = usersCtr.tweetsToJson(stat[0], req.user, obj.users);
+        res.tweets=obj.tweets;
+        res.users=obj.users;
+        //res = Object.assign(userData, res);
+        //res.json(obj);
+        usersCtr.loadUsersToObj(res.users).then(function () {
+                //cb( {tweets: obj.tweets, users: users} );
+             res = Object.assign(userData, res);
 
+            console.log(['GGG', obj]);
+            res.json(obj);
+
+        }).catch(next);
+
+    }).catch(next);*/
     res.json(userToData(req.user));
 }
 
@@ -195,6 +193,5 @@ function followUser(req, res, next) {
 module.exports = {
     user,
     postUser,
-    userToData,
     followUser
 };

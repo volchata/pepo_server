@@ -65,7 +65,6 @@ describe('User controller unit test', function () {
         var response = createResponse();
         ctrUsers.getUserByLogin(request, response);
         response.on('end', function () {
-            //console.log(['data',response._getData()]);
             assert.equal(response.statusCode, 404);
             done();
         });
@@ -102,15 +101,13 @@ describe('User controller unit test', function () {
             url: '/api/users/' + Json2.displayName,
             params: {login: Json2.displayName}}, user1);
         var response = createResponse();
-        ctrUsers.getUserByLogin(request, response);
+        ctrUsers.getUserByLogin(request, response, function (err) {
+            console.log(['TTT', err]);
+        });
         response.on('end', function () {
             assert.equal(response.statusCode, 200);
             var json = JSON.parse(response._getData());
-            for (var i in Json2) {
-                if (!(i in skipCheck) || !skipCheck[i] ) {
-                    assert.equal(json[i], Json2[i]);
-                }
-            }
+            assert(json.users[user2.id] !== undefined);
             done();
         });
 
