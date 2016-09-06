@@ -88,8 +88,8 @@ describe('User controller unit test', function () {
 
             assert.isArray(json.tweetsILike);
             assert.lengthOf(json.tweetsILike, 0);
-            assert.isArray(json.tweetsILikeImages);
-            assert.lengthOf(json.tweetsILikeImages, 0);
+            assert.isArray(json.tweetsImages);
+            assert.lengthOf(json.tweetsImages, 0);
             assert.isArray(json.tweets);
             assert.lengthOf(json.tweets, 0);
             assert.isObject(json.users);
