@@ -22,7 +22,7 @@ var when = require('when');
  * @apiSuccess (200) {String} avatar Avatar of the User.
  * @apiSuccess (200) {Boolean} notRegistered Set if user does not send initial profile update after social login
  * @apiSuccess (200) {Array} tweetsILike Last tweets user likes
- * @apiSuccess (200) {Array} tweetsILikeImages Last tweets with images user likes
+ * @apiSuccess (200) {Array} tweetsImages Last tweets with images user likes
  * @apiSuccess (200) {Array} tweets Last user tweets
  * @apiSuccess (200) {Object} users Users for tweets collection. At least contains current user.
  * @apiSuccess (200) {Number} followers Number of user's followers
@@ -38,7 +38,7 @@ function user(req, res, next) {
         var obj = usersCtr.tweetsToJson(stat[2], req.user);
         resData.tweetsILike = obj.tweets;
         obj = usersCtr.tweetsToJson(stat[1], req.user, obj.users);
-        resData.tweetsILikeImages = obj.tweets;
+        resData.tweetsImages = obj.tweets;
         obj = usersCtr.tweetsToJson(stat[0], req.user, obj.users);
         resData.tweets = obj.tweets;
         resData.users = obj.users;
