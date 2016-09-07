@@ -47,6 +47,9 @@ function user(req, res, next) {
         usersCtr.loadUsersToObj(resData.users).then(function () {
                 //cb( {tweets: obj.tweets, users: users} );
             resData = Object.assign(userData, resData);
+            if (req.geoip !== undefined) {
+                resData.geoIpInfo = req.geoip;
+            }
              //console.log(['GGG', res]);
             res.json(resData);
 
