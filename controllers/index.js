@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports.limitData = require('./mUser').limitData;
+module.exports.geoIpInfo = require('./mUser').geoIpInfo;
 module.exports.images = require('./images');
 module.exports.users = require('./users');
 module.exports.user = require('./user');

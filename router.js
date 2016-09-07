@@ -32,6 +32,7 @@ commonRouter        // роутер для обычных путей аутен�
 apiRouter
     .use(controllers.auth.ensureAuthenticatedAPI)               // обязательная проверка аутентификации пользователя
     .use(controllers.cors)                                      // и заголовки Cross origin resourse sharing
+    .use(controllers.geoIpInfo)
     .get('/user', controllers.user.user)
     .post('/user', controllers.user.postUser)
     .use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
