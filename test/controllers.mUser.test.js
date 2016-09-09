@@ -42,6 +42,20 @@ describe('mUser middleware tests', function () {
 
         });
 
+        it('remote address with strange data', function (done) {
+            var request = createRequest({method: 'GET'}, {remoteAddress: 'ollolo.trol.lo.lo'});
+            var response = createResponse();
+            ctr.geoIpInfo(request, response, function () {
+                assert( request.geoip === null);
+                done();
+            });
+            response.on('end', function () {
+                assert.Fail();
+                done();
+            });
+
+        });
+
         it('dirrect request from yandex', function (done) {
             var request = createRequest({method: 'GET'}, {remoteAddress: '213.180.217.10'});
             var response = createResponse();
@@ -57,7 +71,7 @@ describe('mUser middleware tests', function () {
 
         });
 
-        it('dirrect request from google via yandex', function (done) {
+        it('request from google via yandex', function (done) {
             var request = createRequest({
                 method: 'GET',
                 headers: {'x-forwarded-for': '209.185.108.134'}
