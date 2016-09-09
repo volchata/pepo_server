@@ -2,10 +2,10 @@
 var geoip = require('geoip-lite');
 
 function isPrivateIP(ip) {
-    var parts = ip.split('.');
-    return parts[0] === '10' ||
+    var parts = String(ip).split('.');
+    return parts.length === 4 && (parts[0] === '10' ||
         (parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) ||
-        (parts[0] === '192' && parts[1] === '168');
+        (parts[0] === '192' && parts[1] === '168'));
 }
 
 module.exports = {
@@ -25,16 +25,20 @@ module.exports = {
 
     geoIpInfo: function (req, res, next) {
         if (req.connection) {
-            var ip = req.connection.remoteAddress;
-            if (req.headers) {
+
+            if (req.headers && req.headers['x-forwarded-for'] !== undefined) {
                 var ip2 = req.headers['x-forwarded-for'];
                 if (ip2 && !isPrivateIP(ip2)) {
                     req.geoip = geoip.lookup(ip2);
-                    next();
-                    return;
                 }
+            } else if (req.connection.remoteAddress !== undefined) {
+                var ip = req.connection.remoteAddress;
+                if (ip && !isPrivateIP(ip)) {
+                    req.geoip = geoip.lookup(ip);
+                }
+
             }
-            req.geoip = geoip.lookup(ip);
+
         }
 
         next();
