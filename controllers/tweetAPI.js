@@ -304,6 +304,9 @@ function getTweets(req, res, next) {
                         return next(err);
                     } else {
                         parseTweet(tweets, next, (o) => {
+                            if (req.geoip) {
+                                o.geoIp = {ll: req.geoip.ll};
+                            }
                             res.status(200).json(o);
                         }, user);
                     }
@@ -322,6 +325,9 @@ function getTweets(req, res, next) {
                         return next(err);
                     } else {
                         parseTweet(tweets, next, (o) => {
+                            if (req.geoip) {
+                                o.geoIp = {ll: req.geoip.ll};
+                            }
                             res.status(200).json(o);
                         }, user);
                     }
@@ -345,6 +351,9 @@ function getTweets(req, res, next) {
                         return next(err);
                     } else {
                         parseTweet(tweets, next, (o) => {
+                            if (req.geoip) {
+                                o.geoIp = {ll: req.geoip.ll};
+                            }
                             res.status(200).json(o);
                         }, user);
                     }
