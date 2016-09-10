@@ -5,9 +5,9 @@ function userToData(user) {
         displayName: user.displayName,
         //socialNetworkId: req.user.socialNetworkId,
         //provider: req.user.provider,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        description: user.description,
+        firstName: user.firstName||'',
+        lastName: user.lastName||'',
+        description: user.description||'',
         avatar: user.avatar ? user.avatar : 'http://placehold.it/100x100'
     };
     if (typeof user.followers !== 'undefined') {
