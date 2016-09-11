@@ -48,7 +48,6 @@ describe('User controller unit test', function () {
 
         var request = createRequest({method: 'GET', url: '/api/user'}, user1);
         var response = createResponse();
-        ctr.user(request, response);
         response.on('end', function () {
             var json = JSON.parse(response._getData());
             for (var i in Json1) {
@@ -58,6 +57,8 @@ describe('User controller unit test', function () {
 
             }
         });
+        ctr.user(request, response);
+
     }
 
     before(function () {
@@ -73,10 +74,6 @@ describe('User controller unit test', function () {
     it('get user', function (done) {
         var request = createRequest({method: 'GET', url: '/api/user'}, user1);
         var response = createResponse();
-        ctr.user(request, response, function (err) {
-            console.log(err);
-            assert(false, 'Next called');
-        });
         response.on('end', function () {
             var json = JSON.parse(response._getData());
             assert.equal(response.statusCode, 200);
@@ -96,6 +93,10 @@ describe('User controller unit test', function () {
             assert(json.users[user1.id] !== undefined);
             done();
         });
+        ctr.user(request, response, function (err) {
+            console.log(err);
+            assert(false, 'Next called');
+        });
 
     });
     it('post displayName', function (done) {//done required for assinc asserts
@@ -108,8 +109,6 @@ describe('User controller unit test', function () {
         };
         var request = createRequest(data, user1);
         var response = createResponse();
-        ctr.postUser(request, response);
-
         response.on('end', function () {
             //assert.equal(response._getRedirectUrl(), '/api/user');
             //assert.equal(response.statusCode, 302);
@@ -125,7 +124,7 @@ describe('User controller unit test', function () {
 
             done();
         });
-
+        ctr.postUser(request, response);
     });
     it('get posted displayName', checkSaved);
 
@@ -139,15 +138,11 @@ describe('User controller unit test', function () {
         };
         var request = createRequest(data, user2);
         var response = createResponse();
-        ctr.postUser(request, response);
-
         response.on('end', function () {
-            //assert.equal(response._getRedirectUrl(), '/api/user');
-            //assert.equal(response.statusCode, 302);
             assert.equal(response.statusCode, 409);
             done();
         });
-
+        ctr.postUser(request, response);
     });
     it('post firstName', function (done) {//done required for assinc asserts
         var data = {
@@ -159,11 +154,7 @@ describe('User controller unit test', function () {
         };
         var request = createRequest(data, user1);
         var response = createResponse();
-        ctr.postUser(request, response);
-
         response.on('end', function () {
-            //assert.equal(response._getRedirectUrl(), '/api/user');
-            //assert.equal(response.statusCode, 302);
             assert.equal(response.statusCode, 200);
             Json1.isRegistered = undefined;
             Json1.firstName = 'newFirstName';
@@ -175,7 +166,7 @@ describe('User controller unit test', function () {
             }
             done();
         });
-
+        ctr.postUser(request, response);
     });
     it('get posted firstName', checkSaved);
     it('post lastName', function (done) {//done required for assinc asserts
@@ -188,8 +179,6 @@ describe('User controller unit test', function () {
         };
         var request = createRequest(data, user1);
         var response = createResponse();
-        ctr.postUser(request, response);
-
         response.on('end', function () {
             assert.equal(response.statusCode, 200);
             Json1.notRegistered = undefined;
@@ -202,7 +191,7 @@ describe('User controller unit test', function () {
             }
             done();
         });
-
+        ctr.postUser(request, response);
     });
     it('get posted lastName', checkSaved);
 
@@ -216,11 +205,7 @@ describe('User controller unit test', function () {
         };
         var request = createRequest(data, user1);
         var response = createResponse();
-        ctr.postUser(request, response);
-
         response.on('end', function () {
-            //assert.equal(response._getRedirectUrl(), '/api/user');
-            //assert.equal(response.statusCode, 302);
             assert.equal(response.statusCode, 200);
             Json1.notRegistered = undefined;
             Json1.description = 'my very cool description';
@@ -233,11 +218,11 @@ describe('User controller unit test', function () {
 
             done();
         });
+        ctr.postUser(request, response);
 
     });
     it('get posted description', checkSaved);
     describe('add user to followers', function () {
-        //'/users/:login/follower'
         it('post user to followers', function (done) {//done required for assinc asserts
             user2.displayName = '__follows' + (new Date());
             var data = {
@@ -248,8 +233,6 @@ describe('User controller unit test', function () {
             user2.save(function () {
                 var request = createRequest(data, user1);
                 var response = createResponse();
-                ctr.followUser(request, response);
-
                 response.on('end', function () {
                     assert.equal(response.statusCode, 200);
                     var json = JSON.parse(response._getData());
@@ -260,6 +243,7 @@ describe('User controller unit test', function () {
                     });
                     done();
                 });
+                ctr.followUser(request, response);
             });
 
         });
@@ -272,8 +256,6 @@ describe('User controller unit test', function () {
             };
             var request = createRequest(data, user1);
             var response = createResponse();
-            ctr.followUser(request, response);
-
             response.on('end', function () {
                 assert.equal(response.statusCode, 200);
                 var json = JSON.parse(response._getData());
@@ -285,6 +267,8 @@ describe('User controller unit test', function () {
                 done();
             });
 
+            ctr.followUser(request, response);
+
         });
 
         it('get profile of followed user', function (done) {
@@ -292,14 +276,14 @@ describe('User controller unit test', function () {
                 method: 'GET',
                 params: {login: user2.displayName}}, user1);
             var response = createResponse();
-            ctrUsers.getUserByLogin(request, response, function (err) {
-                console.log(['{{{', err]);
-            });
             response.on('end', function () {
                 var json = JSON.parse(response._getData());
                 assert.equal(response.statusCode, 200);
                 assert.property(json, 'followed');
                 done();
+            });
+            ctrUsers.getUserByLogin(request, response, function (err) {
+                console.log(['{{{', err]);
             });
 
         });
@@ -313,8 +297,6 @@ describe('User controller unit test', function () {
             };
             var request = createRequest(data, user1);
             var response = createResponse();
-            ctr.followUser(request, response);
-
             response.on('end', function () {
                 assert.equal(response.statusCode, 200);
                 var json = JSON.parse(response._getData());
@@ -325,6 +307,8 @@ describe('User controller unit test', function () {
                 });
                 done();
             });
+
+            ctr.followUser(request, response);
 
         });
         it('delete user from followers again', function (done) {//done required for assinc asserts
@@ -336,8 +320,6 @@ describe('User controller unit test', function () {
             };
             var request = createRequest(data, user1);
             var response = createResponse();
-            ctr.followUser(request, response);
-
             response.on('end', function () {
                 assert.equal(response.statusCode, 200);
                 var json = JSON.parse(response._getData());
@@ -348,6 +330,8 @@ describe('User controller unit test', function () {
                 });
                 done();
             });
+
+            ctr.followUser(request, response);
 
         });
 

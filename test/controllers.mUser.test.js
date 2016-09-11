@@ -31,12 +31,12 @@ describe('mUser middleware tests', function () {
         it('undefined by default', function (done) {
             var request = createRequest({method: 'GET'});
             var response = createResponse();
-            ctr.geoIpInfo(request, response, function () {
-                assert( request.geoip === undefined);
-                done();
-            });
             response.on('end', function () {
                 assert.Fail();
+                done();
+            });
+            ctr.geoIpInfo(request, response, function () {
+                assert( request.geoip === undefined);
                 done();
             });
 
@@ -45,30 +45,28 @@ describe('mUser middleware tests', function () {
         it('remote address with strange data', function (done) {
             var request = createRequest({method: 'GET'}, {remoteAddress: 'ollolo.trol.lo.lo'});
             var response = createResponse();
-            ctr.geoIpInfo(request, response, function () {
-                assert( request.geoip === null);
-                done();
-            });
             response.on('end', function () {
                 assert.Fail();
                 done();
             });
-
+            ctr.geoIpInfo(request, response, function () {
+                assert( request.geoip === null);
+                done();
+            });
         });
 
         it('dirrect request from yandex', function (done) {
             var request = createRequest({method: 'GET'}, {remoteAddress: '213.180.217.10'});
             var response = createResponse();
+            response.on('end', function () {
+                assert.Fail();
+                done();
+            });
             ctr.geoIpInfo(request, response, function () {
                 assert( request.geoip !== undefined);
                 assert.equal(request.geoip.country, 'RU');
                 done();
             });
-            response.on('end', function () {
-                assert.Fail();
-                done();
-            });
-
         });
 
         it('request from google via yandex', function (done) {
@@ -77,13 +75,13 @@ describe('mUser middleware tests', function () {
                 headers: {'x-forwarded-for': '209.185.108.134'}
             }, {remoteAddress: '213.180.217.10'});
             var response = createResponse();
+            response.on('end', function () {
+                assert.Fail();
+                done();
+            });
             ctr.geoIpInfo(request, response, function () {
                 assert( request.geoip !== undefined);
                 assert.equal(request.geoip.country, 'US');
-                done();
-            });
-            response.on('end', function () {
-                assert.Fail();
                 done();
             });
 
