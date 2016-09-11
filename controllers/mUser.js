@@ -24,15 +24,23 @@ module.exports = {
     },
 
     geoIpInfo: function (req, res, next) {
+        var ip;
+        var ip2;
         if (req.connection) {
 
             if (req.headers && req.headers['x-forwarded-for'] !== undefined) {
-                var ip2 = req.headers['x-forwarded-for'];
+                ip2 = req.headers['x-forwarded-for'];
                 if (ip2 && !isPrivateIP(ip2)) {
                     req.geoip = geoip.lookup(ip2);
                 }
+            } else if (req.headers['x-jfh3fh36gt4re3rybfh-remote'] !== undefined) {
+                ip = req.headers['x-jfh3fh36gt4re3rybfh-remote'];
+                if (ip && !isPrivateIP(ip)) {
+                    req.geoip = geoip.lookup(ip);
+                }
+
             } else if (req.connection.remoteAddress !== undefined) {
-                var ip = req.connection.remoteAddress;
+                ip = req.connection.remoteAddress;
                 if (ip && !isPrivateIP(ip)) {
                     req.geoip = geoip.lookup(ip);
                 }
