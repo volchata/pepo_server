@@ -63,12 +63,11 @@ describe('User controller unit test', function () {
             url: '/api/users/' + Json2.displayName,
             params: {login: Json2.displayName}}, user1);
         var response = createResponse();
-        ctrUsers.getUserByLogin(request, response);
         response.on('end', function () {
             assert.equal(response.statusCode, 404);
             done();
         });
-
+        ctrUsers.getUserByLogin(request, response);
     });
     it('register user2', function (done) {//done required for assinc asserts
         var data = {
@@ -79,8 +78,6 @@ describe('User controller unit test', function () {
         data.body = Json2;
         var request = createRequest(data, user2);
         var response = createResponse();
-        ctrUser.postUser(request, response);
-
         response.on('end', function () {
             var json = JSON.parse(response._getData());
             assert.equal(response.statusCode, 200);
@@ -93,7 +90,7 @@ describe('User controller unit test', function () {
             }
             done();
         });
-
+        ctrUser.postUser(request, response);
     });
     it('user1 get profile of registered user2', function (done) {
         var request = createRequest({
@@ -101,14 +98,15 @@ describe('User controller unit test', function () {
             url: '/api/users/' + Json2.displayName,
             params: {login: Json2.displayName}}, user1);
         var response = createResponse();
-        ctrUsers.getUserByLogin(request, response, function (err) {
-            console.log(['TTT', err]);
-        });
         response.on('end', function () {
             assert.equal(response.statusCode, 200);
             var json = JSON.parse(response._getData());
             assert(json.users[user2.id] !== undefined);
             done();
+        });
+
+        ctrUsers.getUserByLogin(request, response, function (err) {
+            console.log(['TTT', err]);
         });
 
     });
@@ -122,11 +120,12 @@ describe('User controller unit test', function () {
                 params: {login}
             }, user1);
             var response = createResponse();
-            ctrUsers.getUserFollowers(request, response);
             response.on('end', function () {
                 assert.equal(response.statusCode, 404);
                 done();
             });
+
+            ctrUsers.getUserFollowers(request, response);
         });
         it('user1 has no followers. get followers', function (done) {
             var request = createRequest({
@@ -135,11 +134,11 @@ describe('User controller unit test', function () {
                 params: {login: Json1.displayName}
             }, user1);
             var response = createResponse();
-            ctrUsers.getUserFollowers(request, response);
             response.on('end', function () {
                 assert.equal(response.statusCode, 204);
                 done();
             });
+            ctrUsers.getUserFollowers(request, response);
         });
 
         it('user1 has 300 followers. get followers', function (done) {
@@ -162,7 +161,6 @@ describe('User controller unit test', function () {
                     params: {login: Json1.displayName}
                 }, user1);
                 var response = createResponse();
-                ctrUsers.getUserFollowers(request, response);
                 response.on('end', function () {
                     assert.equal(response.statusCode, 200);
                     var json = JSON.parse(response._getData());
@@ -172,6 +170,7 @@ describe('User controller unit test', function () {
                     assert.equal(json.total, 300);
                     done();
                 });
+                ctrUsers.getUserFollowers(request, response);
             });
 
         });
@@ -195,7 +194,6 @@ describe('User controller unit test', function () {
                 params: {search: 'fol'}
             }, user1);
             var response = createResponse();
-            ctrUsers.searchUsers(request, response);
             response.on('end', function () {
                 assert.equal(response.statusCode, 200);
                 var json = JSON.parse(response._getData());
@@ -203,7 +201,7 @@ describe('User controller unit test', function () {
 
                 done();
             });
-
+            ctrUsers.searchUsers(request, response);
         });
 
         it('search unexisted user', function (done) {
@@ -214,14 +212,13 @@ describe('User controller unit test', function () {
                 params: {search: login}
             }, user1);
             var response = createResponse();
-            ctrUsers.searchUsers(request, response);
             response.on('end', function () {
                 assert.equal(response.statusCode, 200);
                 var json = JSON.parse(response._getData());
                 assert.lengthOf(json, 0);
                 done();
             });
-
+            ctrUsers.searchUsers(request, response);
         });
     });
     describe('user follows', function () {
@@ -234,11 +231,11 @@ describe('User controller unit test', function () {
                 params: {login}
             }, user1);
             var response = createResponse();
-            ctrUsers.getUserFollows(request, response);
             response.on('end', function () {
                 assert.equal(response.statusCode, 404);
                 done();
             });
+            ctrUsers.getUserFollows(request, response);
         });
         it('user1 has no follows. get follows', function (done) {
             var request = createRequest({
@@ -247,11 +244,11 @@ describe('User controller unit test', function () {
                 params: {login: Json1.displayName}
             }, user1);
             var response = createResponse();
-            ctrUsers.getUserFollows(request, response);
             response.on('end', function () {
                 assert.equal(response.statusCode, 204);
                 done();
             });
+            ctrUsers.getUserFollows(request, response);
         });
 
         it('user1 has 300 follows. get follows', function (done) {
@@ -274,7 +271,6 @@ describe('User controller unit test', function () {
                     params: {login: Json1.displayName}
                 }, user1);
                 var response = createResponse();
-                ctrUsers.getUserFollows(request, response);
                 response.on('end', function () {
                     assert.equal(response.statusCode, 200);
                     var json = JSON.parse(response._getData());
@@ -284,6 +280,7 @@ describe('User controller unit test', function () {
                     assert.equal(json.total, 300);
                     done();
                 });
+                ctrUsers.getUserFollows(request, response);
             });
 
         });
