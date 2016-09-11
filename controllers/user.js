@@ -1,14 +1,12 @@
 'use strict';
 
 var User = require('../models/user').User;
-var Tweet = require('../models/tweet').Tweet;
 var textEscapeForRE = require('../libs/utils').textEscapeForRE;
-var userToData = require('../libs/utils').userToData;
+var users = require('./users');
+var img = require('./images');
+
 var webPref = require('../conf').get('storage:web');
 var localImg = new RegExp( textEscapeForRE(webPref), 'i');
-var usersCtr = require('../controllers/users');
-var img = require('./images');
-var when = require('when');
 
 /**
  * @api {get} /api/user Get user profile
@@ -32,31 +30,9 @@ var when = require('when');
  * @param res
  */
 function user(req, res, next) {
-    Tweet.userTweetsCombined(req.user).then(function (stat) {
-        var userData = userToData(req.user);
-        var resData = {};
-        var obj = usersCtr.tweetsToJson(stat[2], req.user);
-        resData.tweetsILike = obj.tweets;
-        obj = usersCtr.tweetsToJson(stat[1], req.user, obj.users);
-        resData.tweetsImages = obj.tweets;
-        obj = usersCtr.tweetsToJson(stat[0], req.user, obj.users);
-        resData.tweets = obj.tweets;
-        resData.users = obj.users;
-        //res = Object.assign(userData, res);
-        //res.json(obj);
-        usersCtr.loadUsersToObj(resData.users).then(function () {
-                //cb( {tweets: obj.tweets, users: users} );
-            resData = Object.assign(userData, resData);
-            if (req.geoip !== undefined) {
-                resData.geoIpInfo = req.geoip;
-            }
-             //console.log(['GGG', res]);
-            res.json(resData);
-
-        }).catch(next);
-
+    users.getUserProfile(req.user, req.geoip).then((userData) => {
+        res.json(userData);
     }).catch(next);
-    //res.json(userToData(req.user));
 }
 
 /**
@@ -101,9 +77,9 @@ function postUser(req, res) {
             }
             if (err) {
                 if ( err.code === 11000 || err.code === 11001 ) {
-                    res.status(409).send({status: 'Duplicate key'});
+                    res.status(409).json({status: 'Duplicate key'});
                 } else {
-                    res.status(400).send({status: 'Error saving data'});
+                    res.status(400).json({status: 'Error saving data'});
                 }
 
             } else {
@@ -187,11 +163,9 @@ function followUser(req, res, next) {
                 new: true
             }).exec();
 
-            when.all([p1, p2]).then(function (stats) {
-                return res.json(userToData(stats[1]));
-            }).catch(function (err) {
-                next(err);
-            });
+            Promise.all([p1, p2]).then(function (stats) {
+                return res.json(users.userToData(stats[1]));
+            }).catch(next);
         }
     });
 }
