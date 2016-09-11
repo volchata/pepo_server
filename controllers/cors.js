@@ -1,12 +1,24 @@
 'use strict';
+var os = require('os');
+var config = require('../conf');
+
+var origin = 'http://volchata.ml';
+var port = config.get('server:portCallback');
+
+if (os.hostname() !== 'volchata') {
+    origin += ' http://localhost' ;
+    if (port) {
+        origin += ':' + port;
+    }
+}
 
 module.exports = function (req, res, next) {
 
     // Website you wish to allow to connect, example http://localhost:8888
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', origin);
 
     // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
 
     // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
