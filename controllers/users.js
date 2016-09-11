@@ -1,14 +1,16 @@
 'use strict';
-var userToData = require('../libs/utils.js').userToData;
 var User = require('../models/user').User;
 var Tweet = require('../models/tweet').Tweet;
+var parseTweet = require('./tweetAPI').parseTweet;
 
 var foreignUserFields = {
     displayName: 1,
     avatar: 1,
     firstName: 1,
     lastName: 1,
-    _id: 0};
+    _id: 0
+};
+
 function foreignUserToData(user) {
     return myForeignUserToData(null, user);
 }
@@ -24,6 +26,49 @@ function myForeignUserToData(me, user) {
         }
     }
     return data;
+}
+
+function userToData(user) {
+    var data = {
+        displayName: user.displayName,
+        //socialNetworkId: req.user.socialNetworkId,
+        //provider: req.user.provider,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        description: user.description
+        // avatar: user.avatar ? user.avatar : 'http://placehold.it/100x100'
+    };
+    if (user.avatar) {
+        data.avatar = user.avatar;
+    }
+    if (typeof user.followers !== 'undefined') {
+        data.followers = user.followers.length;
+    }
+    if (typeof user.follows !== 'undefined') {
+        data.follows = user.follows.length;
+    }
+
+    if (user.notRegistered) {
+        data.notRegistered = true;
+    }
+    return data;
+}
+
+function getUserProfile(user, geoip) {
+    return Tweet.userTweetsCombined(user).then(function (stat) {
+        return Promise.all(
+            stat.map((s) => parseTweet(s, user))
+        );
+    }).then((stat)=>{
+        var userData = userToData(user);
+        ['tweets_last', 'tweets_liked', 'tweets_pics'].forEach((name, idx)=>{
+            userData[name] = stat[idx];
+        });
+        if (geoip != null) {  // eslint-disable-line no-eq-null,eqeqeq
+            userData.geoIpInfo = geoip;
+        }
+        return userData;
+    });
 }
 
 /**
@@ -44,45 +89,22 @@ function myForeignUserToData(me, user) {
  */
 function getUserByLogin(req, res, next) {
     var displayName = req.params.login;
-    User.byDisplayname(displayName).exec( function (err, user) {
-        if (err) {
-            next(err);
-        } else if (!user) {
-            res.status(404).send({status: 'Not found'});
-        } else {
-            User.findOne({_id: req.user._id}, function (err, cuser) {
-                //var json=myForeignUserToData(cuser,user);
-                var meFollow = cuser.follows.some(function (foll) {
-                    return foll.equals(user.id);
-                });
-
-                Tweet.find({
-                    $and: [
-                        {author: user._id},
-                        {'extras.commentedTweetId': {$exists: false}}
-                    ]
-                })
-                .sort({timestamp: -1})
-                .limit(10)
-                .exec((err, tweets) => {
-                    if (err) {
-                        console.log('err', err);
-                        return next(err);
-                    } else {
-                        parseTweet(tweets, next, (o) => {
-
-                            if (meFollow) {
-                                o.followed = true;
-                            }
-                            res.status(200).json(o);
-                        }, user);
-                    }
-                });
-            });
+    User.byDisplayname(displayName).exec()
+    .then( (user) => {
+        if (!user) {
+            throw {type: 404}; // eslint-disable-line no-throw-literal
         }
-    });
-
+        return getUserProfile(req.user, req.geoip);
+    }).then((userData) => {
+        res.json(userData);
+    }).catch((e)=>{
+        if (e.type === 404) {
+            return res.status(404).send({status: 'Not found'});
+        }
+        throw e;
+    }).catch(next);
 }
+
 function getUserChildCollection(child, mapBy) {
     return function (req, res, next) {
         var displayName = req.params.login;
@@ -174,138 +196,33 @@ var getUserFollows = getUserChildCollection('follows', foreignUserToData);
  */
 function searchUsers(req, res, next) {
     var search = req.params.search.trim();
-    User.search(search).limit(10).exec(
-        function (err, users) {
-            if (err) {
-                next(err);
-            } else if ((!users) || users.length === 0) {
-                res.json([]);
-            } else {
-                res.json(users.map(foreignUserToData));
-            }}
-    );
-}
-
-function tweetsToJson(tweets, user, users) {
-    var def = {};
-    def[user._id] = null;
-    users = users || def;
-    if (!(tweets instanceof Array)) {
-        tweets = [tweets];
-    }
-    tweets = tweets.map(x => {
-        var isLiked;
-        var isRetweeted;
-        var tweet = x.toJSON();
-        if (users[tweet.author] === undefined) {
-            users[tweet.author] = null;
-        }
-        if (user && tweet.extras) {
-            if (tweet.extras.likes) {
-                isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
-            }
-            if (tweet.extras.retweets) {
-                isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()));
-            }
-
-            tweet.like = isLiked;
-            tweet.retweet = isRetweeted;
+    User.search(search).limit(10).exec()
+    .then((users) => {
+        if ((!users) || users.length === 0) {
+            res.json([]);
         } else {
-            if (!(tweet.extras)) {
-                tweet.extras = {};
-            }
+            res.json(users.map(foreignUserToData));
         }
-
-        return tweet;
-    });
-    return {
-        tweets,
-        users
-    };
+    }).catch(next);
 }
 
 function loadUsersToObj(users) {
-    return new Promise(function (resolve, reject) {
-        User.find({_id: {$in: Object.keys(users)}})
-            .exec((err, authors) => {
-                if (!err) {
-                    authors.forEach(u => {
-                        users[u._id] = userToData(u);
-                    });
-                    resolve(users);
-                } else {
-                    reject(err);
-                }
-            });
-    });
-
-}
-
-function parseTweet(tweets, next, cb, user) {
-    var obj = tweetsToJson(tweets, user);
-    return loadUsersToObj(obj.users).then(function () {
-        //cb( {tweets: obj.tweets, users: users} );
-        cb( obj );
-
-    }).catch(function (err) {
-        console.log(err);
-    });
-
-}
-
-/*function parseTweet(tweets, next, cb, user) {
-
-    var users = {};
-    if (!(tweets instanceof Array)) {
-        tweets = [tweets];
-    }
-
-    tweets = tweets.map(x => {
-        var isLiked;
-        var isRetweeted;
-        var tweet = x.toJSON();
-        users[tweet.author] = null;
-
-        if (user && tweet.extras) {
-            if (tweet.extras.likes) {
-                isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
-            }
-            if (tweet.extras.retweets) {
-                isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()) );
-            }
-
-            tweet.like = isLiked;
-            tweet.retweet = isRetweeted;
-        } else {
-            if (!(tweet.extras)) {
-                tweet.extras = {};
-            }
-        }
-
-        return tweet;
-    });
-
-    User.find({_id: {$in: Object.keys(users)}})
-        .exec((err, authors) => {
-            if (err) {
-                return next(err);
-            }
-
+    return User.find({_id: {$in: Object.keys(users)}}).exec()
+        .then((authors) => {
             authors.forEach(u => {
                 users[u._id] = userToData(u);
             });
-
-            cb( {tweets: tweets, users: users} );
+            return users;
         });
 }
-*/
-module.exports = {
+
+Object.assign(module.exports, {
     foreignUserToData,
+    userToData,
+    loadUsersToObj,
+    getUserProfile,
     getUserByLogin,
     getUserFollowers,
     getUserFollows,
-    searchUsers,
-    parseTweet,
-    tweetsToJson,
-    loadUsersToObj
-};
+    searchUsers
+});

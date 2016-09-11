@@ -3,9 +3,8 @@
 var mongoose = require('mongoose');
 var Tweet = require('../models/tweet').Tweet;
 var User = require('../models/user').User;
-//var userFilter = require('./user');
-var parseTweet = require('./users').parseTweet;
 var images = require('./images');
+var users = require('./users');
 
 var Encoder = (new (require('node-html-encoder').Encoder)('entity'));
 var encode = ( Encoder.htmlEncode.bind(Encoder) );
@@ -26,7 +25,7 @@ function createTwit(user, base, cb ) {
     };
 
     var t = ['commentedTweetId', 'geo', 'url', 'parentTweetId', 'image', 'attachment'];
-    /*eslint-disable no-unexpected-multiline,no-sequences */
+    /*eslint-disable-next-line no-unexpected-multiline,no-sequences */
     t.forEach((item) => {
         if (base[item]) {
             b.extras[item] = base[item];
@@ -89,9 +88,8 @@ function setTweet(req, res, next) {
                 if (err) {
                     return next(err);
                 } else {
-                    parseTweet(tweet, next, (o) => {
-                        res.status(200).json(o);
-                    }, user);
+
+                    return ParseTweetsAndSend(res, tweet, user, next);
                 }
             });
         });
@@ -144,19 +142,12 @@ function reTweet(req, res, next) {
                     });
 
                     parentTweet.extras.retweets.push(user._id);
-                    parentTweet.save(function (err) {
-                        if (err) {
-                            return next(err);
-                        }
-                        Tweet.find({_id: parentTweetId}).exec((err1, newTweet) => {
-                            if (err1) {
-                                return next(err1);
-                            } else {
-                                parseTweet(newTweet, next, (o) => {
-                                    res.status(200).json(o);
-                                }, user);
-                            }
-                        });
+                    parentTweet.save()
+                    .then( () => {
+                        return Tweet.find({_id: parentTweetId}).exec();
+                    })
+                    .then((newTweet) => {
+                        return ParseTweetsAndSend(res, newTweet, user, next);
                     });
                 } else {
                     res.status(200).json({status: 'Already retweeted'});
@@ -202,9 +193,7 @@ function commentTweet(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweet, next, (o) => {
-                            res.status(200).json(o);
-                        }, user);
+                        return ParseTweetsAndSend(res, tweet, user, next);
                     }
                 });
 
@@ -252,9 +241,7 @@ function getComments(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweets, next, (o) => {
-                            res.status(200).json(o);
-                        });
+                        return ParseTweetsAndSend(res, tweets, null, next);
                     }
                 });
             } else {
@@ -271,9 +258,7 @@ function getComments(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweets, next, (o) => {
-                            res.status(200).json(o);
-                        });
+                        return ParseTweetsAndSend(res, tweets, null, next);
                     }
                 });
             }
@@ -303,12 +288,12 @@ function getTweets(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweets, next, (o) => {
+                        parseTweet(tweets, next, user).then((o) => {
                             if (req.geoip) {
                                 o.geoIp = {ll: req.geoip.ll};
                             }
                             res.status(200).json(o);
-                        }, user);
+                        });
                     }
                 });
             } else {
@@ -324,12 +309,12 @@ function getTweets(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweets, next, (o) => {
+                        parseTweet(tweets, next, user).then((o) => {
                             if (req.geoip) {
                                 o.geoIp = {ll: req.geoip.ll};
                             }
                             res.status(200).json(o);
-                        }, user);
+                        });
                     }
                 });
             }
@@ -386,9 +371,7 @@ function getHistory(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweets, next, (o) => {
-                            res.status(200).json(o);
-                        }, user);
+                        return ParseTweetsAndSend(res, tweets, user, next);
                     }
                 });
             } else {
@@ -404,9 +387,7 @@ function getHistory(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweets, next, (o) => {
-                            res.status(200).json(o);
-                        }, user);
+                        return ParseTweetsAndSend(res, tweets, user, next);
                     }
                 });
             }
@@ -444,9 +425,7 @@ function getTweet(req, res, next) {
                     return res.status(404).json({status: 'Tweet not found'});
                 }
 
-                parseTweet(tweet, next, (o) => {
-                    res.status(200).json(o);
-                }, user);
+                return ParseTweetsAndSend(res, tweet, user, next);
 
             });
         });
@@ -488,9 +467,7 @@ function likeTweet(req, res, next) {
                             return next(err);
                         }
 
-                        parseTweet(tweet, next, (o) => {
-                            res.status(200).json(o);
-                        }, user);
+                        return ParseTweetsAndSend(res, tweet, user, next);
 
                     });
                 } else if (req.method === 'DELETE' && !(index === -1)) {
@@ -500,14 +477,10 @@ function likeTweet(req, res, next) {
                             return next(err);
                         }
 
-                        parseTweet(tweet, next, (o) => {
-                            res.status(200).json(o);
-                        }, user);
+                        return ParseTweetsAndSend(res, tweet, user, next);
                     });
                 } else {
-                    parseTweet(tweet, next, (o) => {
-                        res.status(200).json(o);
-                    }, user);
+                    return ParseTweetsAndSend(res, tweet, user, next);
                 }
 
             });
@@ -541,9 +514,7 @@ function deleteTweet(req, res, next) {
                     return res.status(404).json({status: 'Tweet not found'});
                 }
 
-                parseTweet(tweet, next, (o) => {
-                    res.status(200).json(o);
-                }, user);
+                return ParseTweetsAndSend(res, tweet, user, next);
             });
     });
 }
@@ -595,39 +566,35 @@ function deleteReTweet(req, res, next) {
                                     return next(err);
                                 }
 
-                                parseTweet(parentTweet, next, (o) => {
-                                    res.status(200).json(o);
-                                }, user);
+                                return ParseTweetsAndSend(res, parentTweet, user, next);
                             });
                         } else {
-                            parseTweet(parentTweet, next, (o) => {
-                                res.status(200).json(o);
-                            }, user);
+                            return ParseTweetsAndSend(res, parentTweet, user, next);
                         }
 
                     });
             });
     });
 }
-/*
-function parseTweet(tweets, next, cb, user) {
-    var users = {};
+
+function tweetsToJson(tweets, user, users) {
+    users = users || {};
     if (!(tweets instanceof Array)) {
         tweets = [tweets];
     }
-
     tweets = tweets.map(x => {
         var isLiked;
         var isRetweeted;
         var tweet = x.toJSON();
-        users[tweet.author] = null;
-
+        if (users[tweet.author] === undefined) {
+            users[tweet.author] = null;
+        }
         if (user && tweet.extras) {
             if (tweet.extras.likes) {
                 isLiked = tweet.extras.likes.some(x => x.toString() === user._id.toString());
             }
             if (tweet.extras.retweets) {
-                isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()) );
+                isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()));
             }
 
             tweet.like = isLiked;
@@ -640,21 +607,29 @@ function parseTweet(tweets, next, cb, user) {
 
         return tweet;
     });
-
-    User.find({_id: {$in: Object.keys(users)}})
-        .exec((err, authors) => {
-            if (err) {
-                return next(err);
-            }
-
-            authors.forEach(u => {
-                users[u._id] = userFilter.userToData(u);
-            });
-
-            cb( {tweets: tweets, users: users} );
-        });
+    return {
+        tweets,
+        users
+    };
 }
-*/
+
+function parseTweet(tweets, user) {
+    var obj = tweetsToJson(tweets, user);
+    return users.loadUsersToObj(obj.users).then(function () {
+        return obj;
+    });
+}
+
+function ParseTweetsAndSend(res, tws, user, next) {
+    if (user == null) {   // eslint-disable-line no-eq-null,eqeqeq
+        user = res.req.user;
+    }
+    return parseTweet(tws, user)
+    .then((o) => {
+        res.status(200).json(o);
+    }).catch(next);
+}
+
 module.exports = {
     setTweet,
     reTweet,
@@ -665,5 +640,7 @@ module.exports = {
     getTweet,
     likeTweet,
     deleteTweet,
-    deleteReTweet
+    deleteReTweet,
+    parseTweet,
+    tweetsToJson
 };

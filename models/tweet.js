@@ -1,7 +1,6 @@
 'use strict';
 
 var mongoose = require('../libs/mongoose-connect');
-var when = require('when');
 var Schema = mongoose.Schema;
 
 var schema = new Schema({
@@ -36,7 +35,7 @@ schema.statics.userTweetsCombined = function (user) {
         'extras.image': {$exists: true, $ne: ''}
     }).sort({timestamp: -1}).limit(10).exec();
     var liked = this.find({'extras.likes': user._id}).sort({timestamp: -1}).limit(10).exec();
-    return when.all([all, images, liked]);
+    return Promise.all([all, images, liked]);
 };
 exports.Tweet = mongoose.model('Tweet', schema);
 exports.Mongoose = mongoose;
