@@ -288,7 +288,7 @@ function getTweets(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweets, next, user).then((o) => {
+                        parseTweet(tweets, user).then((o) => {
                             if (req.geoip) {
                                 o.geoIp = {ll: req.geoip.ll};
                             }
@@ -309,7 +309,7 @@ function getTweets(req, res, next) {
                     if (err) {
                         return next(err);
                     } else {
-                        parseTweet(tweets, next, user).then((o) => {
+                        parseTweet(tweets, user).then((o) => {
                             if (req.geoip) {
                                 o.geoIp = {ll: req.geoip.ll};
                             }
