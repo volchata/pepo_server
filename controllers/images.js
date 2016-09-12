@@ -158,7 +158,7 @@ function garbageCollector() {
 (function () {
     /*eslint-disable no-implicit-coercion */
     var dt = +(conf.get('storage:gcInterval'));
-    if (typeof dt !== 'number') {
+    if ((typeof dt !== 'number') || (isNaN(dt))) {
         dt = 6;
     }
     if (dt < 1) {

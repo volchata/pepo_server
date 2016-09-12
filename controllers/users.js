@@ -61,7 +61,7 @@ function getUserProfile(user, geoip) {
         );
     }).then((stat)=>{
         var userData = userToData(user);
-        ['tweets_last', 'tweets_liked', 'tweets_pics'].forEach((name, idx)=>{
+        ['tweets_last', 'tweets_pics', 'tweets_liked'].forEach((name, idx)=>{
             userData[name] = stat[idx];
         });
         if (geoip != null) {  // eslint-disable-line no-eq-null,eqeqeq
