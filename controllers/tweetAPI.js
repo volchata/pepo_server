@@ -128,6 +128,7 @@ function reTweet(req, res, next) {
 
                 if (!isRetweet) {
                     req.body.parentTweetId = parentTweetId;
+                    req.body.content = parentTweet.content;
 
                     createTwit(user, req.body, (err1, tweet) => {
                         if (err1) {
