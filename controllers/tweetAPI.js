@@ -506,15 +506,19 @@ function deleteTweet(req, res, next) {
         Tweet.findByIdAndRemove(deleteTweetId)
             .where('author', user._id)
             .exec((err, tweet) => {
-                if (err) {
-                    return next(err);
-                }
-
                 if (!tweet) {
                     return res.status(404).json({status: 'Tweet not found'});
                 }
+                var comments = tweet.extras.comments;
 
-                return ParseTweetsAndSend(res, tweet, user, next);
+                Tweet.find({_id: {$in: comments}})
+                    .remove()
+                    .exec((err) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        return ParseTweetsAndSend(res, tweet, user, next);
+                    });
             });
     });
 }
