@@ -144,7 +144,9 @@ describe('User controller unit test', function () {
             assert.equal(response.statusCode, 409);
             done();
         });
-        ctr.postUser(request, response);
+        ctr.postUser(request, response, function (err) {
+            console.log(['POST CONFLICT', err]);
+        });
     });
     it('post firstName', function (done) {//done required for assinc asserts
         var data = {
