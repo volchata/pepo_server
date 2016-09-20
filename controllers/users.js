@@ -89,14 +89,25 @@ function getUserProfile(user, geoip) {
  */
 function getUserByLogin(req, res, next) {
     var displayName = req.params.login;
+    var userId;
     User.byDisplayname(displayName).exec()
     .then( (user) => {
         if (!user) {
             throw {type: 404}; // eslint-disable-line no-throw-literal
         }
-        return getUserProfile(req.user, req.geoip);
+        userId = user.id;
+        return getUserProfile(user, req.geoip);
     }).then((userData) => {
-        res.json(userData);
+        User.findOne({_id: req.user._id}, function (err, cuser) {
+            var meFollow = cuser.follows.some(function (foll) {
+                return foll.equals(userId);
+            });
+            if (meFollow) {
+                userData.followed = true;
+            }
+            res.json(userData);
+        });
+
     }).catch((e)=>{
         if (e.type === 404) {
             return res.status(404).send({status: 'Not found'});

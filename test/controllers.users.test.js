@@ -101,7 +101,9 @@ describe('User controller unit test', function () {
         response.on('end', function () {
             assert.equal(response.statusCode, 200);
             var json = JSON.parse(response._getData());
-            assert(json.users[user2.id] !== undefined);
+            assert(json.displayName, Json2.displayName);
+            //console.log(['REY',json]);
+            //assert(json.tweets_last.users[user2.id] !== undefined);
             done();
         });
 

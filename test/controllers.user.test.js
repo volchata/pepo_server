@@ -281,6 +281,8 @@ describe('User controller unit test', function () {
             response.on('end', function () {
                 var json = JSON.parse(response._getData());
                 assert.equal(response.statusCode, 200);
+                assert.equal(json.displayName, user2.displayName);
+                assert.equal(json.followers, 1);
                 assert.property(json, 'followed');
                 done();
             });
