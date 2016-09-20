@@ -51,7 +51,11 @@ apiRouter
     .post('/user/image', img.preAdd('file'), img.uploadImage)
     .post('/user/snapshot', img.makeSnapshot)
     .get('/user/snapshot/:url([\/a-z0-9_.]+)', img.getSnapshot)
+    .get('/user/interest', controllers.interest.getInterest)
     .post('/users/:login/follower', controllers.user.followUser)
+
+    .post('/user/interest', controllers.interest.postInterest)
+
     .post('/tweet/:id/retweet', controllers.tweet.reTweet)
     .post('/tweet/:id', controllers.tweet.commentTweet)
     .post('/tweet/:id/like', controllers.tweet.likeTweet)

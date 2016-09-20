@@ -10,3 +10,4 @@ module.exports.cors = require('./cors');
 module.exports.tweet = require('./tweetAPI');
 module.exports.snapshot = require('./snapshot');
 module.exports.geo = require('./geo');
+module.exports.interest = require('./interest');
