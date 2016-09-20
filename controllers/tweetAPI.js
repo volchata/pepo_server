@@ -426,7 +426,42 @@ function getTweet(req, res, next) {
                     return res.status(404).json({status: 'Tweet not found'});
                 }
 
-                return ParseTweetsAndSend(res, tweet, user, next);
+                var cUserIds = [];
+                var cTweets = [];
+                for (var i = 0; i < tweet.extras.comments.length; i++) {
+                    var comment = tweet.extras.comments[i];
+
+                    var commentAuthorId = comment.author;
+                    if (cUserIds.indexOf(mongoose.Types.ObjectId(commentAuthorId)) === -1) {
+                        cUserIds[cUserIds.length] = mongoose.Types.ObjectId(commentAuthorId);
+                    }
+
+                    cTweets[cTweets.length] = comment;
+
+                }
+
+               // console.log(cUserIds);
+
+                var cUsers = {};
+
+                if (cUserIds.length) {
+                    User.find({
+                        _id: {$in: cUserIds}
+                    }).exec()
+                        .then(function (item) {
+
+                            cUsers[item[0]._id] = item[0];
+
+                            var comments = {tweets: cTweets, users: cUsers};
+
+                            return ParseTweetsAndSend(res, tweet, user, next, comments);
+                        });
+
+                } else {
+                    return ParseTweetsAndSend(res, tweet, user, next);
+                }
+
+                //
 
             });
         });
@@ -616,17 +651,23 @@ function tweetsToJson(tweets, user, users) {
 
 function parseTweet(tweets, user) {
     var obj = tweetsToJson(tweets, user);
+
     return users.loadUsersToObj(obj.users).then(function () {
         return obj;
     });
 }
 
-function ParseTweetsAndSend(res, tws, user, next) {
+function ParseTweetsAndSend(res, tws, user, next, comments) {
     if (user == null) {   // eslint-disable-line no-eq-null,eqeqeq
         user = res.req.user;
     }
-    return parseTweet(tws, user)
+    return parseTweet(tws, user, comments)
     .then((o) => {
+        if (comments) {
+            o.tweets[0].extras.comments = comments;
+        }
+
+        console.log(comments);
         res.status(200).json(o);
     }).catch(next);
 }

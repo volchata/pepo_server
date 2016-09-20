@@ -207,6 +207,7 @@ function searchUsers(req, res, next) {
 }
 
 function loadUsersToObj(users) {
+
     return User.find({_id: {$in: Object.keys(users)}}).exec()
         .then((authors) => {
             authors.forEach(u => {
