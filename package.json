@@ -20,6 +20,7 @@
     "http-proxy": "^1.14.0",
     "mkdirp": "^0.5.1",
     "mongoose": "^4.5.8",
+    "mongoose-geojson-schema": "^2.1.2",
     "mongoose-paginate": "^5.0.0",
     "morgan": "^1.7.0",
     "multer": "^1.2.0",

@@ -1,6 +1,7 @@
 'use strict';
 
 var mongoose = require('../libs/mongoose-connect');
+require('mongoose-geojson-schema');
 var Schema = mongoose.Schema;
 
 var schema = new Schema({
@@ -25,9 +26,14 @@ var schema = new Schema({
         image: {type: String},
         attachment: {type: Schema.Types.Mixed},
         url: {type: String},
-        geo: {type: Schema.Types.Mixed}
+        //geo: {type: Schema.Types.Mixed}
+        geo: {type: Schema.Types.Feature}
     }
 });
+schema.index({'geo.geometry': '2dsphere'});
+schema.statics.byDistance = function (cb) {
+    return this.find({geo: {$near: this.geo.geometry, $maxDistance: 0.01}}, cb);
+};
 schema.statics.userTweetsCombined = function (user) {
     var all = this.find({author: user._id}).sort({timestamp: -1}).limit(10).exec();
     var images = this.find({

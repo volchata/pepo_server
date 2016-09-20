@@ -8,6 +8,7 @@ var users = require('./users');
 
 var Encoder = (new (require('node-html-encoder').Encoder)('entity'));
 var encode = ( Encoder.htmlEncode.bind(Encoder) );
+var filterGeo = require('../libs/utils').filterGeo;
 
 function prefixOuterURL(url) {
     var re = /^https?:\/\//;
@@ -71,6 +72,12 @@ function createTwit(user, base, cb ) {
 }
 
 function setTweet(req, res, next) {
+    if (req.body.extras && req.body.extras.geo) {
+        console.log(req.body.extras.geo);
+        req.body.extras.geo = filterGeo(req.body.extras.geo);
+        console.log(req.body.extras.geo);
+    }
+
     User.findOne({
         $and: [
             {socialNetworkId: req.user.socialNetworkId},
