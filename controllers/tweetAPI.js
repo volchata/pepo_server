@@ -542,15 +542,19 @@ function deleteTweet(req, res, next) {
         Tweet.findByIdAndRemove(deleteTweetId)
             .where('author', user._id)
             .exec((err, tweet) => {
-                if (err) {
-                    return next(err);
-                }
-
                 if (!tweet) {
                     return res.status(404).json({status: 'Tweet not found'});
                 }
+                var comments = tweet.extras.comments;
 
-                return ParseTweetsAndSend(res, tweet, user, next);
+                Tweet.find({_id: {$in: comments}})
+                    .remove()
+                    .exec((err) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        return ParseTweetsAndSend(res, tweet, user, next);
+                    });
             });
     });
 }
@@ -621,6 +625,7 @@ function tweetsToJson(tweets, user, users) {
     tweets = tweets.map(x => {
         var isLiked;
         var isRetweeted;
+        var isOwner;
         var tweet = x.toJSON();
         if (users[tweet.author] === undefined) {
             users[tweet.author] = null;
@@ -632,9 +637,11 @@ function tweetsToJson(tweets, user, users) {
             if (tweet.extras.retweets) {
                 isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()));
             }
+            isOwner = (tweet.author.toString() === user._id.toString());
 
             tweet.like = isLiked;
             tweet.retweet = isRetweeted;
+            tweet.owner = isOwner;
         } else {
             if (!(tweet.extras)) {
                 tweet.extras = {};
