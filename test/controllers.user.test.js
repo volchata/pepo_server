@@ -76,26 +76,28 @@ describe('User controller unit test', function () {
         var response = createResponse();
         response.on('end', function () {
             var json = JSON.parse(response._getData());
+            //console.log(['GET USER',json]);
             assert.equal(response.statusCode, 200);
             assert(json.notRegistered);
             //assert.equal(json.notRegistered, true);
             assert.equal(json.followers, 0);
             assert.equal(json.follows, 0);
-            assert.equal(json.avatar, 'http://placehold.it/100x100');
+            //assert.equal(json.avatar, 'http://placehold.it/100x100');
 
-            assert.isArray(json.tweetsILike);
-            assert.lengthOf(json.tweetsILike, 0);
-            assert.isArray(json.tweetsImages);
-            assert.lengthOf(json.tweetsImages, 0);
-            assert.isArray(json.tweets);
-            assert.lengthOf(json.tweets, 0);
-            assert.isObject(json.users);
-            assert(json.users[user1.id] !== undefined);
+            assert.isArray(json.tweets_liked.tweets);
+            assert.lengthOf(json.tweets_liked.tweets, 0);
+            assert.isArray(json.tweets_pics.tweets);
+            assert.lengthOf(json.tweets_pics.tweets, 0);
+            assert.isArray(json.tweets_last.tweets);
+            assert.lengthOf(json.tweets_last.tweets, 0);
+            //assert.isObject(json.users);
+            //assert(json.users[user1.id] !== undefined);
             done();
         });
         ctr.user(request, response, function (err) {
             console.log(err);
             assert(false, 'Next called');
+            done();
         });
 
     });
@@ -279,6 +281,8 @@ describe('User controller unit test', function () {
             response.on('end', function () {
                 var json = JSON.parse(response._getData());
                 assert.equal(response.statusCode, 200);
+                assert.equal(json.displayName, user2.displayName);
+                assert.equal(json.followers, 1);
                 assert.property(json, 'followed');
                 done();
             });
