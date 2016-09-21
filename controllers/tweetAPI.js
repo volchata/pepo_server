@@ -409,12 +409,7 @@ function getTweet(req, res, next) {
         ]
     })
         .exec((err, user) => {
-            Tweet.findOne({
-                $and: [
-                    {_id: tweetId},
-                    {'extras.commentedTweetId': {$exists: false}}
-                ]
-            })
+            Tweet.findOne({_id: tweetId})
             .where('extras.comments').slice(10)
             .populate('extras.parentTweetId extras.comments')
             .exec((err, tweet) => {
