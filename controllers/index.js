@@ -9,3 +9,4 @@ module.exports.auth = require('./auth');
 module.exports.cors = require('./cors');
 module.exports.tweet = require('./tweetAPI');
 module.exports.snapshot = require('./snapshot');
+module.exports.geo = require('./geo');

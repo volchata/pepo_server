@@ -59,6 +59,7 @@ apiRouter
     .delete('/tweet/:id/like', controllers.tweet.likeTweet)
     .delete('/tweet/:id', controllers.tweet.deleteTweet)
     .delete('/tweet/:id/retweet', controllers.tweet.deleteReTweet)
+    .get('/geo', controllers.geo.getGeoIp)
     .use(controllers.auth.wrongAPIPoint);
 
 module.exports = function (app) {
