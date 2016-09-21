@@ -111,6 +111,12 @@ function reTweet(req, res, next) {
         return res.status(404).json({status: 'Tweet not found'});
     }
 
+    if (req.body.extras && req.body.extras.geo) {
+        console.log(req.body.extras.geo);
+        req.body.extras.geo = filterGeo(req.body.extras.geo);
+        console.log(req.body.extras.geo);
+    }
+
     User.findOne({
         $and: [
             {socialNetworkId: req.user.socialNetworkId},
@@ -169,6 +175,12 @@ function commentTweet(req, res, next) {
 
     if (!mongoose.Types.ObjectId.isValid(commentedTweetId)) {
         return res.status(404).json({status: 'Tweet not found'});
+    }
+
+    if (req.body.extras && req.body.extras.geo) {
+        console.log(req.body.extras.geo);
+        req.body.extras.geo = filterGeo(req.body.extras.geo);
+        console.log(req.body.extras.geo);
     }
 
     User.findOne({
