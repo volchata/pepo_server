@@ -73,9 +73,7 @@ function createTwit(user, base, cb ) {
 
 function setTweet(req, res, next) {
     if (req.body.extras && req.body.extras.geo) {
-        console.log(req.body.extras.geo);
         req.body.extras.geo = filterGeo(req.body.extras.geo);
-        console.log(req.body.extras.geo);
     }
 
     User.findOne({
@@ -112,9 +110,7 @@ function reTweet(req, res, next) {
     }
 
     if (req.body.extras && req.body.extras.geo) {
-        console.log(req.body.extras.geo);
         req.body.extras.geo = filterGeo(req.body.extras.geo);
-        console.log(req.body.extras.geo);
     }
 
     User.findOne({
@@ -178,9 +174,7 @@ function commentTweet(req, res, next) {
     }
 
     if (req.body.extras && req.body.extras.geo) {
-        console.log(req.body.extras.geo);
         req.body.extras.geo = filterGeo(req.body.extras.geo);
-        console.log(req.body.extras.geo);
     }
 
     User.findOne({
@@ -342,7 +336,6 @@ function getTweets(req, res, next) {
     } else if (req.params.login) {
         User.findOne({displayName: req.params.login})
             .exec((err, user) => {
-                console.log('user', user);
                 Tweet.find({
                     $and: [
                         {author: user._id},
@@ -454,10 +447,7 @@ function getTweet(req, res, next) {
 
                 }
 
-               // console.log(cUserIds);
-
                 var cUsers = {};
-
                 if (cUserIds.length) {
                     User.find({
                         _id: {$in: cUserIds}
@@ -687,8 +677,9 @@ function ParseTweetsAndSend(res, tws, user, next, comments) {
         if (comments) {
             o.tweets[0].extras.comments = comments;
         }
-
-        console.log(comments);
+        if (res.req.geoip) {
+            o.geoIp = {ll: res.req.geoip.ll};
+        }
         res.status(200).json(o);
     }).catch(next);
 }
