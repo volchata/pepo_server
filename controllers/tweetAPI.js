@@ -457,7 +457,6 @@ function getTweet(req, res, next) {
                // console.log(cUserIds);
 
                 var cUsers = {};
-
                 if (cUserIds.length) {
                     User.find({
                         _id: {$in: cUserIds}
@@ -687,8 +686,9 @@ function ParseTweetsAndSend(res, tws, user, next, comments) {
         if (comments) {
             o.tweets[0].extras.comments = comments;
         }
-
-        console.log(comments);
+        if (res.req.geoip) {
+            o.geoIp = {ll: res.req.geoip.ll};
+        }
         res.status(200).json(o);
     }).catch(next);
 }
