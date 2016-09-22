@@ -73,9 +73,7 @@ function createTwit(user, base, cb ) {
 
 function setTweet(req, res, next) {
     if (req.body.extras && req.body.extras.geo) {
-        console.log(req.body.extras.geo);
         req.body.extras.geo = filterGeo(req.body.extras.geo);
-        console.log(req.body.extras.geo);
     }
 
     User.findOne({
@@ -112,9 +110,7 @@ function reTweet(req, res, next) {
     }
 
     if (req.body.extras && req.body.extras.geo) {
-        console.log(req.body.extras.geo);
         req.body.extras.geo = filterGeo(req.body.extras.geo);
-        console.log(req.body.extras.geo);
     }
 
     User.findOne({
@@ -178,9 +174,7 @@ function commentTweet(req, res, next) {
     }
 
     if (req.body.extras && req.body.extras.geo) {
-        console.log(req.body.extras.geo);
         req.body.extras.geo = filterGeo(req.body.extras.geo);
-        console.log(req.body.extras.geo);
     }
 
     User.findOne({
@@ -342,7 +336,6 @@ function getTweets(req, res, next) {
     } else if (req.params.login) {
         User.findOne({displayName: req.params.login})
             .exec((err, user) => {
-                console.log('user', user);
                 Tweet.find({
                     $and: [
                         {author: user._id},
@@ -453,8 +446,6 @@ function getTweet(req, res, next) {
                     cTweets[cTweets.length] = comment;
 
                 }
-
-               // console.log(cUserIds);
 
                 var cUsers = {};
                 if (cUserIds.length) {
