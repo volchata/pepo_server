@@ -6,28 +6,36 @@ var when = require('when');
 
 function postInterest(req, res, next) {
     User.findOne({
-    $and: [
+        $and: [
         {socialNetworkId: req.user.socialNetworkId},
         {provider: req.user.provider}
-    ]}, (err, user) => {
+        ]}, (err, user) => {
         if (!User.isUser(req, res, err, user, next)) {
             return;
         }
 
-        var userInterests = req.body.interests;;
+        var userInterests = req.body.interests;
 
         Interest.find({title: {$in: userInterests}})
             .exec((err, dbInterests) => {
-                if(userInterests.length === dbInterests.length){
+                if (userInterests.length === dbInterests.length) {
                     saveUserInterests(user, dbInterests)
                         .then(function () {
-                            res.status(200).json(user);
+                            User.find({
+                                $and: [
+                                    {interests: {$in: user.interests}},
+                                    {_id: {$ne: user._id}}
+                                ]
+                            })
+                            .exec((err, users) => {
+                                res.status(200).json(users);
+                            });
                         })
                         .catch(next);
-                }else {
+                } else {
                     var titles = dbInterests.map(interest => interest.title);
                     var newInterests = userInterests.map(intr => {
-                        if(titles.indexOf(intr) < 0){
+                        if (titles.indexOf(intr) < 0) {
                             return intr;
                         }
                     });
@@ -37,7 +45,15 @@ function postInterest(req, res, next) {
                             saveUserInterests(user, result);
                         })
                         .then(function () {
-                            res.status(200).json(user);
+                            User.find({
+                                $and: [
+                                    {interests: {$in: user.interests}},
+                                    {_id: {$ne: user._id}}
+                                ]
+                            })
+                            .exec((err, users) => {
+                                res.status(200).json(users);
+                            });
                         })
                         .catch(next);
                 }
@@ -46,18 +62,30 @@ function postInterest(req, res, next) {
 }
 
 function getInterest(req, res, next) {
-    Interest.find({})
-        .exec((err, dbInterests) => {
-            var titles = dbInterests.map(interest => interest.title);
-            res.status(200).json({interests: titles});
-        });
+    User.findOne({
+        $and: [
+        {socialNetworkId: req.user.socialNetworkId},
+        {provider: req.user.provider}
+        ]})
+    .populate('interests')
+    .exec((err, user) => {
+        if (!User.isUser(req, res, err, user, next)) {
+            return;
+        }
+        var userInterests = user.interests.map(intr => intr.title);
+        Interest.find({})
+            .exec((err, dbInterests) => {
+                var titles = dbInterests.map(interest => interest.title);
+                res.status(200).json({allInterests: titles, userInterests: userInterests});
+            });
+    });
 }
 
 function saveNewInterests(interests) {
     var newInterests = [];
 
     interests.forEach(intr => {
-        if(intr !== undefined){
+        if (intr !== undefined) {
             var interest = new Interest({
                 title: intr
             });
@@ -71,11 +99,11 @@ function saveNewInterests(interests) {
     });
 }
 
-function saveUserInterests(user, interests){
+function saveUserInterests(user, interests) {
     var interestIds = interests.map(interest => interest._id);
 
     interestIds.forEach((id) => {
-        if(user.interests.indexOf(id) < 0){
+        if (user.interests.indexOf(id) < 0) {
             user.interests.push(id);
         }
     });

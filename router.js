@@ -39,6 +39,7 @@ apiRouter
     .post('/user', controllers.user.postUser)
     .use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
     .get('/users/:search/search', controllers.users.searchUsers)
+    .get('/user/interest', controllers.user.getUserInterest)
     .get('/users/:login', controllers.users.getUserByLogin)
     .get('/users/:login/feed', controllers.tweet.getTweets)
     .get('/users/:login/followers', controllers.limitData, controllers.users.getUserFollowers)
@@ -51,10 +52,10 @@ apiRouter
     .post('/user/image', img.preAdd('file'), img.uploadImage)
     .post('/user/snapshot', img.makeSnapshot)
     .get('/user/snapshot/:url([\/a-z0-9_.]+)', img.getSnapshot)
-    .get('/user/interest', controllers.interest.getInterest)
+    .get('/interest', controllers.interest.getInterest)
     .post('/users/:login/follower', controllers.user.followUser)
 
-    .post('/user/interest', controllers.interest.postInterest)
+    .post('/interest', controllers.interest.postInterest)
 
     .post('/tweet/:id/retweet', controllers.tweet.reTweet)
     .post('/tweet/:id', controllers.tweet.commentTweet)
