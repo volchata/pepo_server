@@ -435,6 +435,29 @@ function getRandomTopImage(req, res) {
     });
 }
 
+function getNearTweets(req, res, next) {
+    console.log(req);
+    if (!req.geoip) {
+        res.send([]);
+
+    }
+
+    var limit = req.params.limit || 50;
+    var offset = req.params.offset || 0;
+    var center = [req.geoip.ll[1], req.geoip.ll[0]];
+    Tweet.byDistance(center).skip(offset).limit(limit).exec().then(function (tweets) {
+        parseTweet(tweets, req.user)
+            .then((o) => {
+                if (req.geoip) {
+                    o.geoIp = {ll: req.geoip.ll};
+                }
+                res.status(200).json(o);
+            }).catch(next);
+
+    });
+
+}
+
 function getTweet(req, res, next) {
     var tweetId = req.params.id;
 
@@ -729,5 +752,6 @@ module.exports = {
     deleteReTweet,
     parseTweet,
     tweetsToJson,
-    getRandomTopImage
+    getRandomTopImage,
+    getNearTweets
 };

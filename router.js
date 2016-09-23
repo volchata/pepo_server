@@ -66,6 +66,7 @@ apiRouter
     .delete('/tweet/:id/like', controllers.tweet.likeTweet)
     .delete('/tweet/:id', controllers.tweet.deleteTweet)
     .delete('/tweet/:id/retweet', controllers.tweet.deleteReTweet)
+    .get('/near', controllers.tweet.getNearTweets)
     .get('/geo', controllers.geo.getGeoIp)
     .use(controllers.auth.wrongAPIPoint);
 
