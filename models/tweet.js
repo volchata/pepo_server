@@ -32,7 +32,28 @@ var schema = new Schema({
 });
 schema.index({'geo.geometry': '2dsphere'});
 schema.statics.byDistance = function (cb) {
-    return this.find({geo: {$near: this.geo.geometry, $maxDistance: 0.01}}, cb);
+    return this.find({geo: {$neasphere: this.geo.geometry, $maxDistance: 1000}}, cb);
+};
+schema.statics.PopularImages = function () {
+    return this.aggregate([
+        {
+            $match: {
+                'extras.image': {$exists: true, $ne: ''}
+            }
+        },
+        {
+            $project: {
+                'extras.image': 1,
+                imlikes: {$size: '$extras.likes'}
+            }
+        },
+        {
+            $sort: {
+                imlikes: -1
+            }
+        }
+
+    ]);
 };
 schema.statics.userTweetsCombined = function (user) {
     var all = this.find({author: user._id}).sort({timestamp: -1}).limit(10).exec();

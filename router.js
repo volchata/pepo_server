@@ -64,6 +64,7 @@ apiRouter
     .delete('/tweet/:id/like', controllers.tweet.likeTweet)
     .delete('/tweet/:id', controllers.tweet.deleteTweet)
     .delete('/tweet/:id/retweet', controllers.tweet.deleteReTweet)
+    .get('/topimage', controllers.tweet.getRandomTopImage)
     .get('/geo', controllers.geo.getGeoIp)
     .use(controllers.auth.wrongAPIPoint);
 
