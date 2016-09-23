@@ -246,7 +246,7 @@ function getComments(req, res, next) {
                     $and: [
                         {_id: {$in: comments}},
                         {'extras.commentedTweetId': {$exists: true}},
-                        {timestamp: {$gte: req.query.offset}}
+                        {timestamp: {$gt: req.query.offset}}
                     ]
                 })
                 .sort({timestamp: 1})
