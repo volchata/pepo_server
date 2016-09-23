@@ -72,7 +72,7 @@ describe('TweetAPI model unit test', function () {
             tweet3.save(),
             tweet4.save()
         ]).then(function () {
-            Tweet.userTweetsCombined(user1, 10).then(status=>{
+            Tweet.userTweetsCombined(user1).then(status=>{
                 assert.lengthOf(status[0], 2);
                 assert.lengthOf(status[1], 1);
                 assert.equal(status[1][0].content, 'image');

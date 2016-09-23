@@ -60,14 +60,20 @@ schema.statics.PopularImages = function () {
 
     ]);
 };
-schema.statics.userTweetsCombined = function (user) {
+schema.statics.userTweetsCombined = function (user, geoip) {
     var all = this.find({author: user._id}).sort({timestamp: -1}).limit(10).exec();
     var images = this.find({
         author: user._id,
         'extras.image': {$exists: true, $ne: ''}
     }).sort({timestamp: -1}).limit(10).exec();
     var liked = this.find({'extras.likes': user._id}).sort({timestamp: -1}).limit(10).exec();
-    return Promise.all([all, images, liked]);
+
+    var near = [];
+    if (geoip) {
+        var center = [geoip.ll[1], geoip.ll[0]];
+        near = this.byDistance(center).limit(10).exec();
+    }
+    return Promise.all([all, images, liked, near]);
 };
 exports.Tweet = mongoose.model('Tweet', schema);
 exports.Mongoose = mongoose;
