@@ -410,12 +410,13 @@ function getHistory(req, res, next) {
     }
 }
 /**
- * @api {get} /api/user Get user profile
+ * @api {get} /api/topimage Get random top image
  * @apiGroup Tweet
  * @apiName getRandomTopImage
  * @apiVersion 0.1.0
- * @apiSuccess (200) {String} _id: Tweet id.
- * @apiSuccess (200) {String} extras.image Url of image.
+ * @apiSuccess (200) {String} _id Tweet id.
+ * @apiSuccess (200) {Object} extras
+ * @apiSuccess (200) {String} extras\.image Url of image.
  * @apiSuccess (200) {Number} imlikes Number of likes of image
  * @apiError (Errors) 403 Access denied
  * @apiError (Errors) 404 Tweet not found
