@@ -37,6 +37,7 @@ apiRouter
     .get('/user', controllers.user.user)
     //.get('/user', controllers.geoIpInfo, controllers.user.user)
     .post('/user', controllers.user.postUser)
+    .get('/topimage', controllers.tweet.getRandomTopImage)
     .use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
     .get('/users/:search/search', controllers.users.searchUsers)
     .get('/user/interest', controllers.user.getUserInterest)
@@ -64,7 +65,6 @@ apiRouter
     .delete('/tweet/:id/like', controllers.tweet.likeTweet)
     .delete('/tweet/:id', controllers.tweet.deleteTweet)
     .delete('/tweet/:id/retweet', controllers.tweet.deleteReTweet)
-    .get('/topimage', controllers.tweet.getRandomTopImage)
     .get('/geo', controllers.geo.getGeoIp)
     .use(controllers.auth.wrongAPIPoint);
 
