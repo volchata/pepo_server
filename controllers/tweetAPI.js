@@ -402,10 +402,36 @@ function getHistory(req, res, next) {
                     } else {
                         return ParseTweetsAndSend(res, tweets, user, next);
                     }
+                });Tweet.PopularImages().limit(10).exec().then(res=>{
+                    console.log(res);
                 });
             }
         });
     }
+}
+/**
+ * @api {get} /api/user Get user profile
+ * @apiGroup Tweet
+ * @apiName getRandomTopImage
+ * @apiVersion 0.1.0
+ * @apiSuccess (200) {String} _id: Tweet id.
+ * @apiSuccess (200) {String} extras.image Url of image.
+ * @apiSuccess (200) {Number} imlikes Number of likes of image
+ * @apiError (Errors) 403 Access denied
+ * @apiError (Errors) 404 Tweet not found
+ * @param req
+ * @param res
+ */
+function getRandomTopImage(req, res) {
+    Tweet.PopularImages().limit(10).exec().then(result=>{
+        var max = Math.min(result.length, 10);
+        if (max === 0) {
+            res.status(404).json({status: 'Tweet not found'});
+        } else {
+            console.log(res[Math.floor(Math.random() * max)]);
+            res.status(200).json(result[Math.floor(Math.random() * max)]);
+        }
+    });
 }
 
 function getTweet(req, res, next) {
@@ -701,5 +727,6 @@ module.exports = {
     deleteTweet,
     deleteReTweet,
     parseTweet,
-    tweetsToJson
+    tweetsToJson,
+    getRandomTopImage
 };
