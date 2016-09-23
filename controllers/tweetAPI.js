@@ -246,10 +246,10 @@ function getComments(req, res, next) {
                     $and: [
                         {_id: {$in: comments}},
                         {'extras.commentedTweetId': {$exists: true}},
-                        {timestamp: {$gt: req.query.offset}}
+                        {timestamp: {$lt: req.query.offset}}
                     ]
                 })
-                .sort({timestamp: 1})
+                .sort({timestamp: 0})
                 .limit(req.query.limit > 50 ? 50 : ((Number(req.query.limit) || 10)))
                 .exec((err, tweets) => {
                     if (err) {
