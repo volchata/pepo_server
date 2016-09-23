@@ -641,7 +641,12 @@ function tweetsToJson(tweets, user, users) {
             if (tweet.extras.retweets) {
                 isRetweeted = tweet.extras.retweets.some(x => (x.toString() === user._id.toString()));
             }
-            isOwner = (tweet.author.toString() === user._id.toString());
+
+            if (user.owner !== undefined) {
+                isOwner = user.owner;
+            } else {
+                isOwner = (tweet.author.toString() === user._id.toString());
+            }
 
             tweet.like = isLiked;
             tweet.retweet = isRetweeted;
