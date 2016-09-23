@@ -12,6 +12,7 @@ var img = controllers.images;
 // var snap = controllers.snapshot;
 
 commonRouter        // роутер для обычных путей аутентификации
+    .get('/topimage', controllers.tweet.getRandomTopImage)
     .get('/auth/', rproxy)
     .get('/auth/vk', controllers.auth.authVK)
     .get('/auth/vk/callback', controllers.auth.authVK)
@@ -37,7 +38,7 @@ apiRouter
     .get('/user', controllers.user.user)
     //.get('/user', controllers.geoIpInfo, controllers.user.user)
     .post('/user', controllers.user.postUser)
-    .get('/topimage', controllers.tweet.getRandomTopImage)
+
     .use(controllers.auth.ensureRegisteredAPI)                 // точка проверки регистрации
     .get('/users/:search/search', controllers.users.searchUsers)
     .get('/user/interest', controllers.user.getUserInterest)
