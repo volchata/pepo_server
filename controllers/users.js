@@ -96,6 +96,7 @@ function getUserByLogin(req, res, next) {
             throw {type: 404}; // eslint-disable-line no-throw-literal
         }
         userId = user.id;
+        user.owner = false;
         return getUserProfile(user, req.geoip);
     }).then((userData) => {
         User.findOne({_id: req.user._id}, function (err, cuser) {
