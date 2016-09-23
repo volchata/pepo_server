@@ -92,7 +92,7 @@ function postUser(req, res) {
 
 }
 
-function getUserInterest(req, res, next) {
+function getUserInterest(req, res) {
     User.findOne({
         $and: [
             {socialNetworkId: req.user.socialNetworkId},
@@ -185,8 +185,8 @@ function followUser(req, res, next) {
                 new: true
             }).exec();
 
-            Promise.all([p1, p2]).then(function (stats) {
-                return res.json(users.userToData(stats[1]));
+            Promise.all([p1, p2]).then(function () {
+                return users.getUserByLogin(req, res, next);
             }).catch(next);
         }
     });
