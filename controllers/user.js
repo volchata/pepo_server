@@ -91,6 +91,28 @@ function postUser(req, res) {
     }
 
 }
+
+function getUserInterest(req, res, next) {
+    User.findOne({
+        $and: [
+            {socialNetworkId: req.user.socialNetworkId},
+            {provider: req.user.provider}
+        ]
+    })
+    .exec((err, user) => {
+        User.find({
+            $and: [
+                {interests: {$in: user.interests}},
+                {_id: {$nin: user.follows}},
+                {_id: {$ne: user._id}}
+            ]
+        })
+        .exec((err, users) => {
+            console.log('users', users);
+            res.status(200).json(users);
+        });
+    });
+}
 /**
  * @api {delete} /users/:login/follower Stop follow user
  * @apiDescription Current user stop follow user whith displayName :login
@@ -173,5 +195,6 @@ function followUser(req, res, next) {
 module.exports = {
     user,
     postUser,
-    followUser
+    followUser,
+    getUserInterest
 };
