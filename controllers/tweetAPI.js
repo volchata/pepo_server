@@ -433,36 +433,91 @@ function getTweet(req, res, next) {
                     return res.status(404).json({status: 'Tweet not found'});
                 }
 
-                var cUserIds = [];
-                var cTweets = [];
-                for (var i = 0; i < tweet.extras.comments.length; i++) {
-                    var comment = tweet.extras.comments[i];
+                console.log(tweet.extras.commentedTweetId);
 
-                    var commentAuthorId = comment.author;
-                    if (cUserIds.indexOf(mongoose.Types.ObjectId(commentAuthorId)) === -1) {
-                        cUserIds[cUserIds.length] = mongoose.Types.ObjectId(commentAuthorId);
+                if (tweet.extras.commentedTweetId) {
+
+                    Tweet.findOne({_id: tweet.extras.commentedTweetId}).exec((err, parent) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        console.log(parent);
+
+                        tweet.extras.parent = parent;
+
+
+                        var cUserIds = [];
+                        var cTweets = [];
+                        for (var i = 0; i < tweet.extras.comments.length; i++) {
+                            var comment = tweet.extras.comments[i];
+
+                            var commentAuthorId = comment.author;
+                            if (cUserIds.indexOf(mongoose.Types.ObjectId(commentAuthorId)) === -1) {
+                                cUserIds[cUserIds.length] = mongoose.Types.ObjectId(commentAuthorId);
+                            }
+
+                            cTweets[cTweets.length] = comment;
+
+                        }
+
+                    // console.log(cUserIds);
+
+                        var cUsers = {};
+
+                        if (cUserIds.length) {
+                            User.find({
+                                _id: {$in: cUserIds}
+                            }).exec()
+                            .then(function (item) {
+
+                                cUsers[item[0]._id] = item[0];
+
+                                var comments = {tweets: cTweets, users: cUsers};
+
+                                return ParseTweetsAndSend(res, tweet, user, next, comments);
+                            });
+
+                        } else {
+                            return ParseTweetsAndSend(res, tweet, user, next);
+                        }
+
+                    });
+                } else {
+                    var cUserIds = [];
+                    var cTweets = [];
+                    for (var i = 0; i < tweet.extras.comments.length; i++) {
+                        var comment = tweet.extras.comments[i];
+
+                        var commentAuthorId = comment.author;
+                        if (cUserIds.indexOf(mongoose.Types.ObjectId(commentAuthorId)) === -1) {
+                            cUserIds[cUserIds.length] = mongoose.Types.ObjectId(commentAuthorId);
+                        }
+
+                        cTweets[cTweets.length] = comment;
+
                     }
 
-                    cTweets[cTweets.length] = comment;
+                    // console.log(cUserIds);
 
-                }
+                    var cUsers = {};
 
-                var cUsers = {};
-                if (cUserIds.length) {
-                    User.find({
-                        _id: {$in: cUserIds}
-                    }).exec()
-                        .then(function (item) {
+                    if (cUserIds.length) {
+                        User.find({
+                            _id: {$in: cUserIds}
+                        }).exec()
+                            .then(function (item) {
 
-                            cUsers[item[0]._id] = item[0];
+                                cUsers[item[0]._id] = item[0];
 
-                            var comments = {tweets: cTweets, users: cUsers};
+                                var comments = {tweets: cTweets, users: cUsers};
 
-                            return ParseTweetsAndSend(res, tweet, user, next, comments);
-                        });
+                                return ParseTweetsAndSend(res, tweet, user, next, comments);
+                            });
 
-                } else {
-                    return ParseTweetsAndSend(res, tweet, user, next);
+                    } else {
+                        return ParseTweetsAndSend(res, tweet, user, next);
+                    }
+
                 }
 
                 //
