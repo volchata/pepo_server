@@ -30,9 +30,14 @@ var schema = new Schema({
         geo: {type: Schema.Types.Feature}
     }
 });
-schema.index({'geo.geometry': '2dsphere'});
-schema.statics.byDistance = function (cb) {
-    return this.find({geo: {$neasphere: this.geo.geometry, $maxDistance: 1000}}, cb);
+schema.index({'extras.geo.geometry': '2dsphere'});
+/**
+ * @param coords Array [lon,lat]
+ * @returns {*}
+ */
+schema.statics.byDistance = function (coords) {
+    return this.find({'extras.geo.geometry':
+        {$nearSphere: {$geometry: {type: 'Point', coordinates: coords}, $maxDistance: 1000}}});
 };
 schema.statics.PopularImages = function () {
     return this.aggregate([
