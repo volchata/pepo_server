@@ -39,11 +39,11 @@ function createSnapshot(src, dst, cb) {
     if (!(cb instanceof Function)) {
         throw new Error('Callback should be a function');
     }
-    forker(encoder, opts.concat(src, dst), {timeout: 10000}, (error, stdout, stderr)=>{
+    forker(encoder, opts.concat(src, dst), {timeout: 30000}, (error, stdout, stderr)=>{
         imageReady = true;
         aggregator(error, stdout, stderr);
     });
-    forker(titleExtractor, [src], {timeout: 4000}, (error, stdout, stderr)=>{
+    forker(titleExtractor, [src], {timeout: 10000}, (error, stdout, stderr)=>{
         if (!error) {
             title = stdout;
         }
