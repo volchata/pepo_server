@@ -55,13 +55,13 @@ function userToData(user) {
 }
 
 function getUserProfile(user, geoip) {
-    return Tweet.userTweetsCombined(user).then(function (stat) {
+    return Tweet.userTweetsCombined(user, geoip).then(function (stat) {
         return Promise.all(
             stat.map((s) => parseTweet(s, user))
         );
     }).then((stat)=>{
         var userData = userToData(user);
-        ['tweets_last', 'tweets_pics', 'tweets_liked'].forEach((name, idx)=>{
+        ['tweets_last', 'tweets_pics', 'tweets_liked', 'tweets_near'].forEach((name, idx)=>{
             userData[name] = stat[idx];
         });
         if (geoip != null) {  // eslint-disable-line no-eq-null,eqeqeq
